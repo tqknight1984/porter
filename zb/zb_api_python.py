@@ -75,8 +75,8 @@ class zb_api:
 
         
 if __name__ == '__main__':
-    access_key    = '719a590c-ab21-4f12-8a32-25ded4ee65cc'
-    access_secret = 'e5b3ccf3-c916-48a1-b83c-d9adc1a3f2f7'
+    access_key    = 'access_key'
+    access_secret = 'access_secret'
 
     api = zb_api(access_key, access_secret)
 
