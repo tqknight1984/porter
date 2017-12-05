@@ -54,7 +54,7 @@ class Config:
         return True
 
 class Syn:
-    def __init__(self, path,section):
+    def __init__(self, path, section):
         self.cfg = Config(path)
         self.section = section
     
@@ -89,8 +89,9 @@ class Syn:
         for k,v in sendfiles.items():
             if self.exist(sftp,os.path.dirname(k)) == False:
                 self.r_mkdirs(sftp,os.path.dirname(k))
-            print k
+            print u'%s---->%s' % (v, k)
             sftp.put(v,k,callback=callback)
+            # sftp.put(v, os.path.join(k, fname))
 
     def postCmd(self,section):
         cmd = self.cfg.get(section,'post_cmd')

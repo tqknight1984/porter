@@ -14,7 +14,7 @@ class SosobtcUtil():
         # self.access_key = access_key
         self._zec_off = zec_off
         self._eth_off = eth_off
-        print "SosobtcUtil.init()"
+        # print "SosobtcUtil.init() ... "
 
     def getSosoData(self):
         response = requests.get('https://www.sosobtc.com/')

@@ -59,7 +59,7 @@ if __name__ == '__main__':
     # os.path.abspath(os.curdir)
     # print os.path.abspath('.') 
     #应该用这个
-    conf_path = os.path.split(os.path.realpath(__file__))[0]+"/"
+    conf_path = os.path.split(os.path.realpath(__file__))[0]+"/conf/"
     confutil = ConfUtil(conf_path)
 
     print conf_path+"==========initconfig=============" + (sys.argv[0])
@@ -78,9 +78,9 @@ if __name__ == '__main__':
 
     print u"-->sql:%s" % sql
 
-    db_host = "115.159.59.28"
-    db_user = "admin"
-    db_pass = "root178ZXC"
+    db_host = "10.105.125.57"
+    db_user = "main"
+    db_pass = "main"
     db_port = 3306
     db_name = "car_315"
     db = pymysql.connect(host=db_host,user=db_user,passwd=db_pass,db=db_name,port = db_port, use_unicode=1,charset='utf8')
@@ -104,10 +104,15 @@ if __name__ == '__main__':
                 notify = row[8]
                 max_val = row[9]
                 min_val = row[10]
+                max_ban = row[11]
+                min_ban = row[12]
+                max_volume = row[13]
+                min_volume = row[14]
+
                 # 打印结果
                 print ("===========> id=%d,openid=%s,name=%s,coin=%s,max_off=%s,min_off=%s,notify=%s,max_val=%s,min_val=%s" % (id, openid, uname, coin, max_off, min_off, notify, max_val, min_val))
                 
-                confutil.saveUserLogic(uname, coin, max_off, min_off, notify, max_val, min_val)
+                confutil.saveUserLogic(uname, coin, max_off, min_off, notify, max_val, min_val, max_ban, min_ban, max_volume, min_volume)
         else :
             if (len(sys.argv) == 3):
                 confutil.delUserLogic(sys.argv[1], sys.argv[2])
