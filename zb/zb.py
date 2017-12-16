@@ -1,23 +1,80 @@
-#coding:utf-8
+# coding=utf-8
 import sys
+import requests
+import json
+import os
+import time
+import subprocess
+
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
+timeout = 1
+
+class bfx2zb:
+    def __init__(self, mykey="", mysecret=""):
+        self.mykey    = mykey
+        self.mysecret = mysecret
+
+    def getZbTicker(self, market):
+        url =  'http://api.zb.com/data/v1/ticker?market=%s' % market
+        try :
+            res = requests.get(url, timeout = timeout)
+            jo = json.loads(res.content)
+            print market + ' ------------->'+ res.content
+            ticker = jo.get("ticker",None)
+            if ticker :
+                return ticker.get('last')
+        except requests.Timeout as e :
+            print e
+
+
+    def outputJs(self, jspath, body):
+        with open(jspath,'w') as fo :
+            fo.write(body)
+            fo.close()
 
 
 if __name__ == "__main__":
-    print u'我是中文'
 
-    #查询是否有未完结订单
+    markets={
+        'eos_usdt':'eos_usdt',
+        'eos_btc':'eos_btc',
+        'eth_usdt':'eth_usdt',
+        'eth_btc':'eth_btc',
+        'etc_usdt':'etc_usdt',
+        'etc_btc':'etc_btc',
+        }
 
-    #查询自己持币数量
-    #判断是否处于浮动仓位
-    #查询最近5笔交易得出平均价
-    #查询当前行情价
-    #比较平均价和行情价
-    #是否有差价交易（买卖）
+    data={}
+    
+    nginx_path = '/data/app/nginx/html/'
+    tm = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+    data = {'up_tm':tm}
 
+    print 'curtm------->',tm
+    bz = bfx2zb()
 
+    for k,v in markets.items() :
+        mkt = v
+        last = bz.getZbTicker(mkt)
+        data[mkt] = last
+        print last
 
+    data['up_tm'] = tm
 
+    temp_file = nginx_path + time.strftime("zb_%Y%m%d%H%M%S.js", time.localtime())
+    outStr = "zb_ticker = %s" % json.dumps(data)
+    bz.outputJs(temp_file, outStr)
+
+    subprocess.call("cp -rf " + temp_file + " " + nginx_path + "/zb.js", shell=True);
+
+        
+
+    
+    # res = requests.get(url)
+    # jo = json.loads(res.content)
+    # print jo
+    # ticker = jo.get('ticker',None)
+    # print (ticker)

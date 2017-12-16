@@ -40,11 +40,23 @@ class zb_api:
 
     def __digest(self, aValue):
         value  = struct.pack("%ds" % len(aValue), aValue)
-        print value
+        # print value
         h = sha.new()
         h.update(value)
         dg = h.hexdigest()
         return dg
+
+    def api_call(self, path, params = ''):
+        try:
+            url = 'http://api.zb.com/data/v1/' + path + '?' + params
+            request = urllib2.Request(url)
+            response = urllib2.urlopen(request, timeout=5)
+            doc = json.loads(response.read())
+            return doc
+        except Exception,ex:
+            print >>sys.stderr, 'zb request ex: ', ex
+            return None
+
 
     def __api_call(self, path, params = ''):
         try:
@@ -54,7 +66,7 @@ class zb_api:
             params+= '&sign=%s&reqTime=%d'%(sign, reqTime)
             url = 'https://trade.zb.com/api/' + path + '?' + params
             request = urllib2.Request(url)
-            response = urllib2.urlopen(request, timeout=2)
+            response = urllib2.urlopen(request, timeout=5)
             doc = json.loads(response.read())
             return doc
         except Exception,ex:
@@ -73,11 +85,68 @@ class zb_api:
             print >>sys.stderr, 'zb query_account exception,',ex
             return None
 
+    def getOrders(self, currency):
+        try:
+            params = "accesskey="+self.mykey+"&currency="+currency+"&method=getOrders&pageIndex=1&tradeType=1"
+            print params
+            path = 'getOrders'
+            
+            obj = self.__api_call(path, params)
+            #print obj
+            return obj
+        except Exception,ex:
+            print >>sys.stderr, 'zb getOrders exception,',ex
+            return None
+
+    def getOrdersNew(self):
+        try:
+            params = "accesskey="+self.mykey+"&currency=etc_usdt&method=getOrdersNew&pageIndex=1&pageSize=1&tradeType=1"
+            path = 'getOrdersNew'
+            
+            obj = self.__api_call(path, params)
+            #print obj
+            return obj
+        except Exception,ex:
+            print >>sys.stderr, 'zb getOrdersNew exception,',ex
+            return None
+
+    def getOrdersIgnoreTradeType(self):
+        try:
+            params = "accesskey="+self.mykey+"&currency=etc_usdt&method=getOrdersIgnoreTradeType&pageIndex=1&pageSize=1"
+            path = 'getOrdersIgnoreTradeType'
+            
+            obj = self.__api_call(path, params)
+            #print obj
+            return obj
+        except Exception,ex:
+            print >>sys.stderr, 'zb getOrdersNew exception,',ex
+            return None
+
+    def getAccountInfo(self):
+        try:
+            params = "accesskey="+self.mykey+"&method=getAccountInfo"
+            path = 'getAccountInfo'
+            
+            obj = self.__api_call(path, params)
+            #print obj
+            return obj
+        except Exception,ex:
+            print >>sys.stderr, 'zb getOrdersNew exception,',ex
+            return None
+
+
         
 if __name__ == '__main__':
-    access_key    = 'access_key'
-    access_secret = 'access_secret'
+    access_key    = ''
+    access_secret = ''
 
     api = zb_api(access_key, access_secret)
 
-    print api.query_account()
+    print (api.api_call("ticker", "market=btc_usdt"))
+
+    # print api.query_account()
+    # print api.getOrders("etc_btc")
+    # print api.getOrdersNew()
+    # print api.getOrdersIgnoreTradeType()
+    print api.getAccountInfo()
+        

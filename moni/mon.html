@@ -1,0 +1,100 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
+    <link rel="stylesheet" href="./static/bootstrap.min.css" type="text/css"/>
+    <link rel="stylesheet" href="./static/vis.min.css" type="text/css"/>
+    <link rel="stylesheet" href="./static/webui.css" type="text/css"/>
+    <link rel="stylesheet" href="./static/timeline-view.css" type="text/css"/>
+
+
+    <script src="./static/sorttable.js"></script>
+    <script src="./static/jquery-1.11.1.min.js"></script>
+    <script src="./static/vis.min.js"></script>
+    <script src="./static/bootstrap-tooltip.js"></script>
+    <script src="./static/initialize-tooltips.js"></script>
+    <script src="./static/table.js"></script>
+    <script src="./static/additional-metrics.js"></script>
+    <script src="./static/timeline-view.js"></script>
+
+    <script src="./static/bootstrap.min.js"></script>
+
+    <meta http-equiv="Refresh" content="30" >
+    <title>$_$</title>
+  </head>
+  <body>
+    <div class="container-fluid">
+      <div class="row-fluid">
+        <div class="span12">
+          <h3 style="vertical-align: middle; display: inline-block;">
+            <a style="text-decoration: none" href="/">
+              <img src="/moni/chelogo.png"/>
+              <span class="version" style="margin-right: 15px;">{{version}}</span>
+            </a>
+            一个亿，先定个小目标！
+          </h3>
+        </div>  
+      </div>
+      <div class="row-fluid">
+      <div class="span12">
+        <ul class="unstyled">
+          <li><strong>检测时间:</strong><strong>{{check_tm}}</strong></li>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="row-fluid">
+      <div class="span12">
+        <h4>监控一下</h4>
+        <table class="table table-bordered table-condensed table-striped sortable">
+          <thead>
+            <th width="" class="">交易对</th>
+            {% for plat in platform -%}
+            <th width="" class="">平台：{{plat}}<br><span id='{{plat}}_tm'>{{plat}}_last_time</th>
+            {% endfor -%}
+            <th width="" class="">差价</th>
+          </thead>
+          <tbody>
+            {% for market in markets -%}
+            <tr>
+              <td>
+                {{market}}
+              </td>
+              {% for plat in platform -%}
+              <td><span id='{{plat}}_{{market}}'>{{plat}}_{{market}}</span></td>
+              {% endfor -%}
+              <td><span id='{{market}}_off'>{{market}}_off</span></td>
+            </tr>
+            {% endfor -%}
+          </tbody>
+        </table>
+      </div>
+    </div> 
+
+    
+  </body>
+  <script src="./zb.js?v={{ver}}"></script>
+  <script src="./bfx.js?v={{ver}}"></script>
+
+  <script>
+    $(function(){
+      {% for plat in platform -%}
+        $('#{{plat}}_tm').text({{plat}}_ticker['up_tm']);
+        {% for market in markets -%}
+        $('#{{plat}}_{{market}}').text({{plat}}_ticker['{{market}}']);
+        {% endfor -%}
+      {% endfor -%}
+
+      {% for market in markets -%}
+      off = {{platform[0]}}_ticker['{{market}}'] - {{platform[1]}}_ticker['{{market}}'];
+      $('#{{market}}_off').text( new Number(off).toFixed(4) );
+      {% endfor -%}
+
+      console.log("---------------"+ zb_ticker['eos_btc']);
+    });
+
+  </script>
+</html>
+
