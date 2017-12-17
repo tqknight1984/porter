@@ -87,6 +87,7 @@ class Syn:
     #{remote : local}    
     def sendfiles(self,sftp,sendfiles):
         for k,v in sendfiles.items():
+            k = k.replace('\\', "/")
             if self.exist(sftp,os.path.dirname(k)) == False:
                 self.r_mkdirs(sftp,os.path.dirname(k))
             print u'%s---->%s' % (v, k)

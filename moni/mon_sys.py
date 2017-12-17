@@ -50,7 +50,14 @@ html_txt = {
         'redisInfo' : [],
         'spider' : [],
         'platform': ['zb', 'bfx'],
-        'markets': ['eos_usdt', 'eos_btc', 'eth_usdt', 'eth_btc', 'etc_usdt', 'etc_btc']
+        'markets': [
+            'btc_usdt',
+            'eos_usdt', 'eos_btc', 
+            'eth_usdt', 'eth_btc', 
+            'etc_usdt', 'etc_btc', 
+            'qtum_usdt', 'qtum_btc',
+            'xrp_usdt', 'xrp_btc',
+            ]
     }
 
 #

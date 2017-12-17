@@ -39,12 +39,17 @@ class bfx2zb:
 if __name__ == "__main__":
 
     markets={
+        'btc_usdt':'btc_usdt',
         'eos_usdt':'eos_usdt',
         'eos_btc':'eos_btc',
         'eth_usdt':'eth_usdt',
         'eth_btc':'eth_btc',
         'etc_usdt':'etc_usdt',
         'etc_btc':'etc_btc',
+        'qtum_usdt':'qtum_usdt',
+        'qtum_btc':'qtum_btc',
+        'xrp_usdt':'xrp_usdt',
+        'xrp_btc':'xrp_btc',
         }
 
     data={}
@@ -69,6 +74,8 @@ if __name__ == "__main__":
     bz.outputJs(temp_file, outStr)
 
     subprocess.call("cp -rf " + temp_file + " " + nginx_path + "/zb.js", shell=True);
+    subprocess.call("rm -rf " + temp_file , shell=True);
+
 
         
 

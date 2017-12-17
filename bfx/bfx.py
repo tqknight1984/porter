@@ -96,7 +96,7 @@ class Bfx(object):
         path = 'ticker/%s' % symb
         # path = 'tickers'
         res =  self.api_get(path)
-        print res
+        print '------17----->',res
         return (res[0], res[2], res[6])
 
     #取当前行情
@@ -208,12 +208,17 @@ class Bfx(object):
 if __name__ == "__main__":
     
     markets={
+        'btc_usdt':'BTCUSD',
         'eos_usdt':'EOSUSD',
         'eos_btc':'EOSBTC',
         'eth_usdt':'ETHUSD',
         'eth_btc':'ETHBTC',
         'etc_usdt':'ETCUSD',
         'etc_btc':'ETCBTC',
+        'qtum_usdt':'QTMUSD',
+        'qtum_btc':'QTMBTC',
+        'xrp_usdt':'XRPUSD',
+        'xrp_btc':'XRPBTC',
         }
 
     data={}
@@ -244,6 +249,7 @@ if __name__ == "__main__":
 
 
     subprocess.call("cp -rf " + temp_file + " " + nginx_path + "/bfx.js", shell=True);
+    subprocess.call("rm -rf " + temp_file , shell=True);
 
 
     
