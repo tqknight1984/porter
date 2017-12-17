@@ -21,7 +21,7 @@
     <script src="./static/bootstrap.min.js"></script>
 
     <meta http-equiv="Refresh" content="30" >
-    <title>$_$</title>
+    <title>一个亿</title>
   </head>
   <body>
     <div class="container-fluid">
@@ -32,7 +32,7 @@
               <img src="/moni/chelogo.png"/>
               <span class="version" style="margin-right: 15px;">{{version}}</span>
             </a>
-            一个亿，先定个小目标！
+            定个小目标！
           </h3>
         </div>  
       </div>
@@ -47,7 +47,7 @@
 
     <div class="row-fluid">
       <div class="span12">
-        <h4>监控一下</h4>
+        <h4>ZB vs BFX</h4>
         <table class="table table-bordered table-condensed table-striped sortable">
           <thead>
             <th width="" class="">交易对</th>
@@ -88,8 +88,12 @@
       {% endfor -%}
 
       {% for market in markets -%}
-      off = {{platform[0]}}_ticker['{{market}}'] - {{platform[1]}}_ticker['{{market}}'];
-      $('#{{market}}_off').text( new Number(off).toFixed(4) );
+        off = 'null'
+        if ( {{platform[0]}}_ticker['{{market}}']  && {{platform[1]}}_ticker['{{market}}'] ) {
+          off = {{platform[0]}}_ticker['{{market}}'] - {{platform[1]}}_ticker['{{market}}'];
+          off = new Number(off).toFixed(4) + " ({{market}})"
+        }
+        $('#{{market}}_off').text( off );
       {% endfor -%}
 
       console.log("---------------"+ zb_ticker['eos_btc']);
