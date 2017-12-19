@@ -211,6 +211,8 @@ if __name__ == "__main__":
         'btc_usdt':'BTCUSD',
         'eos_usdt':'EOSUSD',
         'eos_btc':'EOSBTC',
+        'ltc_usdt':'LTCUSD',
+        'ltc_btc':'LTCBTC',
         'eth_usdt':'ETHUSD',
         'eth_btc':'ETHBTC',
         'etc_usdt':'ETCUSD',
