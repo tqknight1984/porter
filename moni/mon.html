@@ -21,18 +21,14 @@
     <script src="./static/bootstrap.min.js"></script>
 
     <meta http-equiv="Refresh" content="30" >
-    <title>$_$</title>
+    <title>一个亿</title>
   </head>
   <body>
     <div class="container-fluid">
       <div class="row-fluid">
         <div class="span12">
           <h3 style="vertical-align: middle; display: inline-block;">
-            <a style="text-decoration: none" href="/">
-              <img src="/moni/chelogo.png"/>
-              <span class="version" style="margin-right: 15px;">{{version}}</span>
-            </a>
-            一个亿，先定个小目标！
+            定个小目标！
           </h3>
         </div>  
       </div>
@@ -45,54 +41,77 @@
       </div>
     </div>
 
+    {% for vs in vs_pairs -%}
     <div class="row-fluid">
       <div class="span12">
-        <h4>监控一下</h4>
+        <h4>{{vs.name}}</h4>
         <table class="table table-bordered table-condensed table-striped sortable">
           <thead>
             <th width="" class="">交易对</th>
-            {% for plat in platform -%}
-            <th width="" class="">平台：{{plat}}<br><span id='{{plat}}_tm'>{{plat}}_last_time</th>
+            {% for plat in vs.platform -%}
+            <th width="" class="">平台：{{plat}}<br><span id='{{plat}}_tm_{{vs.idx}}'>{{plat}}_last_time</th>
             {% endfor -%}
-            <th width="" class="">差价</th>
+            <th width="" class="">差价 <span class="text-error">?大于3%</span></th>
           </thead>
           <tbody>
-            {% for market in markets -%}
+            {% for market in vs.markets -%}
             <tr>
               <td>
                 {{market}}
               </td>
-              {% for plat in platform -%}
-              <td><span id='{{plat}}_{{market}}'>{{plat}}_{{market}}</span></td>
+              {% for plat in vs.platform -%}
+              <td><span id='{{plat}}_{{market}}_{{vs.idx}}'>{{plat}}_{{market}}</span></td>
               {% endfor -%}
-              <td><span id='{{market}}_off'>{{market}}_off</span></td>
+              <td><span id='{{market}}_off_{{vs.idx}}'>{{market}}_off</span></td>
             </tr>
             {% endfor -%}
           </tbody>
         </table>
       </div>
     </div> 
-
+    {% endfor -%}
     
   </body>
   <script src="./zb.js?v={{ver}}"></script>
   <script src="./bfx.js?v={{ver}}"></script>
+  <script src="./ba.js?v={{ver}}"></script>
 
   <script>
     $(function(){
-      {% for plat in platform -%}
-        $('#{{plat}}_tm').text({{plat}}_ticker['up_tm']);
-        {% for market in markets -%}
-        $('#{{plat}}_{{market}}').text({{plat}}_ticker['{{market}}']);
+      {% for vs in vs_pairs -%}
+
+        {% for plat in vs.platform -%}
+          $('#{{plat}}_tm_{{vs.idx}}').text({{plat}}_ticker['up_tm']);
+          {% for market in vs.markets -%}
+          $('#{{plat}}_{{market}}_{{vs.idx}}').text({{plat}}_ticker['{{market}}']);
+          {% endfor -%}
         {% endfor -%}
-      {% endfor -%}
 
-      {% for market in markets -%}
-      off = {{platform[0]}}_ticker['{{market}}'] - {{platform[1]}}_ticker['{{market}}'];
-      $('#{{market}}_off').text( new Number(off).toFixed(4) );
-      {% endfor -%}
+        {% for market in vs.markets -%}
+          var off_str = 'null'
+          if ( {{vs.platform[0]}}_ticker['{{market}}']  && {{vs.platform[1]}}_ticker['{{market}}'] ) {
+            var v1 = {{vs.platform[0]}}_ticker['{{market}}'];
+            var v2 = {{vs.platform[1]}}_ticker['{{market}}'];
+            var pot = 0;
+            var v_str = (v1 + "").length <= (v2 + "").length ?  (v1 + "") : (v2 + "");
+            var start = v_str.indexOf(".");
+            if( start != -1){
+              pot = v_str.substring(start+1, v_str.length).length
+            }
 
-      console.log("---------------"+ zb_ticker['eos_btc']);
+            var avg =  (parseFloat(v1) + parseFloat(v2))/2;
+            var off = {{vs.platform[0]}}_ticker['{{market}}'] - {{vs.platform[1]}}_ticker['{{market}}'];
+
+            off_str = new Number(off).toFixed(pot) + " ({{market}})";
+            if( Math.abs(off) > (avg * 0.03) ){
+              $('#{{market}}_off_{{vs.idx}}').attr("class", "text-error")
+            }
+          }
+          $('#{{market}}_off_{{vs.idx}}').text( off_str );
+        {% endfor -%}
+
+      {% endfor -%}
+      console.log("---------------done");
     });
 
   </script>

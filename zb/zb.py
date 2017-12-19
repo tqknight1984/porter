@@ -25,7 +25,7 @@ class bfx2zb:
             print market + ' ------------->'+ res.content
             ticker = jo.get("ticker",None)
             if ticker :
-                return ticker.get('last')
+                return ticker.get('last', "null")
         except requests.Timeout as e :
             print e
 
@@ -39,12 +39,21 @@ class bfx2zb:
 if __name__ == "__main__":
 
     markets={
+        'btc_usdt':'btc_usdt',
+        'bcc_usdt':'bcc_usdt',
+        'bcc_btc':'bcc_usdt',
+        'ltc_usdt':'ltc_usdt',
+        'ltc_btc':'ltc_btc',
         'eos_usdt':'eos_usdt',
         'eos_btc':'eos_btc',
         'eth_usdt':'eth_usdt',
         'eth_btc':'eth_btc',
         'etc_usdt':'etc_usdt',
         'etc_btc':'etc_btc',
+        'qtum_usdt':'qtum_usdt',
+        'qtum_btc':'qtum_btc',
+        'xrp_usdt':'xrp_usdt',
+        'xrp_btc':'xrp_btc',
         }
 
     data={}
@@ -69,6 +78,8 @@ if __name__ == "__main__":
     bz.outputJs(temp_file, outStr)
 
     subprocess.call("cp -rf " + temp_file + " " + nginx_path + "/zb.js", shell=True);
+    subprocess.call("rm -rf " + temp_file , shell=True);
+
 
         
 
