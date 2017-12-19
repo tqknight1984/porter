@@ -40,6 +40,10 @@ if __name__ == "__main__":
 
     markets={
         'btc_usdt':'btc_usdt',
+        'bcc_usdt':'bcc_usdt',
+        'bcc_btc':'bcc_usdt',
+        'ltc_usdt':'ltc_usdt',
+        'ltc_btc':'ltc_btc',
         'eos_usdt':'eos_usdt',
         'eos_btc':'eos_btc',
         'eth_usdt':'eth_usdt',
