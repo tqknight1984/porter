@@ -54,19 +54,22 @@ html_txt = {
                 'idx':1,
                 'name':'ZB vs BFX',
                 'platform': ['zb', 'bfx'],
-                'markets': ['btc_usdt','eos_usdt', 'eos_btc', 'eth_usdt', 'eth_btc', 'etc_usdt', 'etc_btc', 'qtum_usdt', 'qtum_btc', 'xrp_usdt', 'xrp_btc',],
+                # 'qtum_usdt', 'qtum_btc',
+                'markets': ['btc_usdt','eos_usdt', 'eos_btc', 'eth_usdt', 'eth_btc', 'etc_usdt', 'etc_btc',  'xrp_usdt', 'xrp_btc',],
             },
             {   
                 'idx':2,
                 'name':'ZB vs BA',
                 'platform': ['zb', 'ba'],
-                'markets': ['btc_usdt','ltc_usdt','ltc_btc', 'eos_btc','eth_usdt', 'eth_btc', 'etc_btc', 'qtum_btc', 'xrp_btc',],
+                # 'qtum_btc',
+                'markets': ['btc_usdt','ltc_usdt','ltc_btc', 'eos_btc','eth_usdt', 'eth_btc', 'etc_btc',  'xrp_btc',],
             },
             {   
                 'idx':3,
                 'name':'BFX vs BA',
                 'platform': ['bfx', 'ba'],
-                'markets': ['btc_usdt','ltc_usdt','ltc_btc', 'eos_btc','eth_usdt', 'eth_btc', 'etc_btc', 'qtum_btc', 'xrp_btc',],
+                # 'qtum_btc',
+                'markets': ['btc_usdt','ltc_usdt','ltc_btc', 'eos_btc','eth_usdt', 'eth_btc', 'etc_btc',  'xrp_btc',],
             },
         ]
     }
