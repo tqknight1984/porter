@@ -25,7 +25,7 @@ class banDao(object):
                 plat            CHAR(50)    NOT NULL,
                 up_tm           INT         NOT NULL,
                 coin            CHAR(50)    NOT NULL,
-                market            CHAR(50)    NOT NULL,
+                market          CHAR(50)    NOT NULL,
                 bid            REAL    NOT NULL,
                 ask            REAL    NOT NULL,
                 last            REAL    NOT NULL,
