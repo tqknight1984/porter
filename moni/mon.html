@@ -51,7 +51,8 @@
             {% for plat in vs.platform -%}
             <th width="" class="">平台：{{plat}}<br><span id='{{plat}}_tm_{{vs.idx}}'>{{plat}}_last_time</th>
             {% endfor -%}
-            <th width="" class="">差价 <span class="text-error">?大于3% </span><span class="text-info">=百分比</span></th>
+            <th width="" class="">差价<span class="text-error">?大于3%</span>
+              <span class="text-info">   =百分比</span><span class="muted">?小于0</span></th>
           </thead>
           <tbody>
             {% for market in vs.markets -%}
@@ -105,13 +106,17 @@
             var avg =  (parseFloat(v1) + parseFloat(v2))/2;
             var off = {{vs.platform[0]}}_ticker['{{market}}'] - {{vs.platform[1]}}_ticker['{{market}}'];
 
-            off_str = new Number(off).toFixed(pot) + " ({{market}})";
+            off_str = new Number(off).toFixed(pot) + " ({{market}})   ";
             if( Math.abs(off) > (avg * 0.03) ){
               $('#{{market}}_off_{{vs.idx}}').attr("class", "text-error")
-              //百分比
-              var percent = new Number(Math.abs(off) / avg * 100).toFixed(2);
-              $('#{{market}}_percent_{{vs.idx}}').text(" ="+percent+"%" );
             }
+            //百分比
+            var percent = new Number(Math.abs(off) / avg * 100).toFixed(2);
+            if (off < 0){
+              // percent = percent * -1;
+              $('#{{market}}_percent_{{vs.idx}}').attr("class", "muted")
+            }
+            $('#{{market}}_percent_{{vs.idx}}').text("   ="+percent+"%" );
             
           }
           $('#{{market}}_off_{{vs.idx}}').text( off_str );

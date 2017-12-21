@@ -18,8 +18,8 @@ sys.setdefaultencoding('utf-8')
 
 class BfxTicker(object):
     BASE_URL = "https://api.bitfinex.com/"
-    KEY=""
-    SECRET=""
+    KEY=conf.BFX_KEY
+    SECRET=conf.BFX_SECRET
 
     def _nonce(self):
         """
@@ -37,8 +37,8 @@ class BfxTicker(object):
 
         return {
             "bfx-nonce": nonce,
-            "bfx-apikey": conf.BFX_KEY,
-            "bfx-signature": conf.BFX_SIGNATURE,
+            "bfx-apikey": self.KEY,
+            "bfx-signature": signature,
             "content-type": "application/json"
         }
 
@@ -178,8 +178,22 @@ class BfxTicker(object):
         active_orders = []
         path = "v2/auth/r/orders"
         res = self.api_post(path = path)
+        print 'get_act_orders--------->',res
         for info in res :
-            symbols = info[3]
+            # symbols = info[3]
+            odr = {}
+            odr['coin'] = 'zzz'
+            odr['market'] = info[3]
+            side = 'none'
+            if info[6] > 0 :
+                side = 'buy'
+            if info[6] < 0 :
+                side = 'sell'
+            odr['side'] = side
+            odr['price'] = info[15]
+            odr['amount'] = info[7]
+            
+
             # print 'symbols--------->',symbols
             active_orders.append(symbols)
         return active_orders
@@ -188,7 +202,9 @@ class BfxTicker(object):
     def get_account_wallet(self):
         account = {}
         path = "v2/auth/r/wallets"
+        # path = "v1/balances"
         res = self.api_post(path = path)
+        # print 'account_wallet------------->', res
         for info in res :
             way = info[0]
             if way == "exchange" :
@@ -235,7 +251,8 @@ if __name__ == "__main__":
         }
     bfx = BfxTicker()
 
-    banDao.createTab()
+    banDao.createTicker()
+    up_tm = int(time.time())
 
     # for mkt, symb in markets.items():
     #     print mkt,"------>",symb
@@ -243,13 +260,25 @@ if __name__ == "__main__":
     #     ticker_price = bfx.get_symb_tick(symb)
     #     if ticker_price :
     #         #to db
-    #         tm = int(time.time())
-    #         banDao.insertTicker(tm, PLAT, tm, mkt.split('/')[0], mkt, ticker_price[0],ticker_price[1],ticker_price[2] )
+    #         banDao.insertTicker(up_tm, PLAT, up_tm, mkt.split('/')[0], mkt, ticker_price[0],ticker_price[1],ticker_price[2] )
     #         print "ticker_price----------->", ticker_price
 
     # banDao.selectPlat(PLAT)
 
-    bfx.get_account_wallet()
+
+    # #账户信息
+    # banDao.createAccount()
+    # accountDic = bfx.get_account_wallet()
+    # banDao.insertAccount(PLAT, up_tm, accountDic)
+    # banDao.selectCount('BTC')
+
+
+    #我的订单信息
+    banDao.createMyOrder()
+    myOdrLs = bfx.get_act_orders()
+    # banDao.insertAccount(PLAT, up_tm, accountDic)
+    # banDao.selectCount('BTC')
+
 
 
 

@@ -16,7 +16,7 @@ class start():
         
 
         print u"-------->",proj_path
-        banDao.createTab()
+        banDao.createTicker()
         for i in range(1) :
             banDao.insertTicker(i,'zb', time.time(), 'btc', 'btc/usdt', '1111', '2222', '33333')    
             banDao.selectTicker('zb', 'btc/usdt')  

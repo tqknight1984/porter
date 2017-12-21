@@ -56,8 +56,8 @@ html_txt = {
                 'idx':1,
                 'name':'ZB vs BFX',
                 'platform': ['zb', 'bfx'],
-                # 'qtum_usdt', 'qtum_btc',
-                'markets': ['btc_usdt','eos_usdt', 'eos_btc', 'eth_usdt', 'eth_btc', 'etc_usdt', 'etc_btc',  'xrp_usdt', 'xrp_btc',],
+                # 
+                'markets': ['btc_usdt','eos_usdt', 'eos_btc', 'eth_usdt', 'eth_btc', 'etc_usdt', 'etc_btc',  'xrp_usdt', 'xrp_btc','qtum_usdt', 'qtum_btc',],
             },
             {   
                 'idx':2,
