@@ -3,3 +3,5 @@ platapi/lib/conf.py
 zb/zb_api_python.py
 sync/syn.conf
 sync/.syn.db
+banzhuan/conf.py
+*.pyc
