@@ -39,15 +39,20 @@ class BfxTicker(object):
             "bfx-nonce": nonce,
             "bfx-apikey": self.KEY,
             "bfx-signature": signature,
-            "content-type": "application/json"
+            "content-type": "application/json",
+
+            # "X-BFX-APIKEY":self.KEY,
+            # "X-BFX-PAYLOAD":body,
+            # "X-BFX-SIGNATURE":signature,
+
         }
 
     def api_post(self, path, body={}):
         nonce = self._nonce()
         rawBody = json.dumps(body)
-        # print("rawBody-------->"+rawBody)
+        print("rawBody-------->"+rawBody)
         headers = self._headers(path, nonce, rawBody)
-        # print("url-------->"+self.BASE_URL + path)
+        print("url-------->"+self.BASE_URL + path)
 
         # print("requests.post("+self.BASE_URL + path + ", headers=" + str(headers) + ", data=" + rawBody + ", verify=True)")
         r = requests.post(self.BASE_URL + path, headers=headers, data=rawBody, verify=True)
@@ -55,7 +60,7 @@ class BfxTicker(object):
           return r.json()
         else:
           print r.status_code
-          print r
+          print r.text
           return ''
         
 
@@ -92,7 +97,7 @@ class BfxTicker(object):
     
     def api_get(self, path, params='') :
         try:
-            url = "https://api.bitfinex.com/v2/%s?%s" % (path, params)
+            url = "https://api.bitfinex.com/%s?%s" % (path, params)
             res = requests.get(url)
             return json.loads(res.text)
         except Exception as e :
@@ -101,10 +106,23 @@ class BfxTicker(object):
 
     #取当前行情 (买卖价格)
     def get_symb_tick(self, symb):
-        path = 'ticker/%s' % symb
+        path = 'v2/ticker/%s' % symb
         # path = 'tickers'
         res =  self.api_get(path)
         print '------17----->',res
+        if res :
+            # 买 卖  最新
+            return (res[0], res[2], res[6])
+        else :
+            return None
+
+     #取当前行情订单
+    def get_trades(self, symb):
+        symb = self.getV1Symbol(symb)
+        path = 'v1/trades/%s' % symb
+        # path = 'tickers'
+        res =  self.api_get(path)
+        print '------19----->',res
         if res :
             return (res[0], res[2], res[6])
         else :
@@ -112,7 +130,7 @@ class BfxTicker(object):
 
     #取当前行情
     def get_tick(self, symb):
-        path = 'tickers'
+        path = 'v2/tickers'
         res =  self.api_get(path)
         return res.json
         
@@ -174,6 +192,7 @@ class BfxTicker(object):
         return (price_avg_buy, price_avg_sell)
      
      #取所有未完结的订单
+     # [{'status': u'ACTIVE', 'price': 9, 'amount': 10, 'coin': u'EOS', 'side': 'buy', 'market': u'tEOSUSD'}]
     def get_act_orders(self):
         active_orders = []
         path = "v2/auth/r/orders"
@@ -182,7 +201,15 @@ class BfxTicker(object):
         for info in res :
             # symbols = info[3]
             odr = {}
-            odr['coin'] = 'zzz'
+            status = info[13]
+            odr['status'] = status
+            coin = info[3]
+            print 'coin---1------>',coin
+            coin = coin[1:]
+            coin = coin.replace('BTC','')
+            coin = coin.replace('USD','')
+            print 'coin---2------>',coin
+            odr['coin'] = coin
             odr['market'] = info[3]
             side = 'none'
             if info[6] > 0 :
@@ -190,17 +217,18 @@ class BfxTicker(object):
             if info[6] < 0 :
                 side = 'sell'
             odr['side'] = side
-            odr['price'] = info[15]
+            odr['price'] = info[16]
             odr['amount'] = info[7]
             
+            active_orders.append(odr)
 
             # print 'symbols--------->',symbols
-            active_orders.append(symbols)
+            # active_orders.append(symbols)
         return active_orders
 
     #余额
     def get_account_wallet(self):
-        account = {}
+        accounts = []
         path = "v2/auth/r/wallets"
         # path = "v1/balances"
         res = self.api_post(path = path)
@@ -208,29 +236,61 @@ class BfxTicker(object):
         for info in res :
             way = info[0]
             if way == "exchange" :
-                coin = info[1]
-                amount = float(info[2])
-                account[coin] =  amount
-        return account
+                inf = {}
+                inf['coin'] = info[1]
+                inf['balance'] = float(info[2])
+                accounts.append(inf)
+        return accounts
 
-    #创建订单
-    def new_orders(self, symbol, amount, price, side):
-        body = {
+
+    def getV1Symbol(self, sym):
+        symbol = sym
+        if symbol.startswith('t',0, 1):
+            symbol = symbol[1:]
+            symbol = symbol.lower()
+        print 'symbol----------',symbol
+        return symbol
+
+    def place_order(self, amount, price, side, ord_type, symbol, exchange='bitfinex'):
+        symbol = self.getV1Symbol(symbol)
+
+        payload = {
             'symbol':symbol,
-            'amount':amount,
-            'price':price,
+            'amount':str(amount),
+            'price':str(price),
             'side':side,
             'type':'exchange limit',
-            'exchange':'bitfinex',
-        }
-        path = "v1/order/new"
-        res = self.api_post(path = path, body=body)
-        print 'res--------->',res
+            'exchange':'bitfinex',  
+            'ocoorder': False,
+            'buy_price_oco': '0',
+            'sell_price_oco': '0',
+            "request": "/v1/order/new",
+            "nonce": str(time.time()),
 
-    def outputJs(self, jspath, body):
-        with open(jspath,'w') as fo :
-            fo.write(body)
-            fo.close()
+        }
+
+        signed_payload = self._sign_payload(payload)
+        r = requests.post(self.BASE_URL + "v1/order/new", headers=signed_payload, verify=True)
+        json_resp = r.json()
+
+        try:
+            json_resp['order_id']
+        except:
+            return json_resp['message']
+
+        return json_resp
+
+    def _sign_payload(self, payload):
+        j = json.dumps(payload)
+        data = base64.standard_b64encode(j.encode('utf8'))
+
+        h = hmac.new(self.SECRET.encode('utf8'), data, hashlib.sha384)
+        signature = h.hexdigest()
+        return {
+            "X-BFX-APIKEY": self.KEY,
+            "X-BFX-SIGNATURE": signature,
+            "X-BFX-PAYLOAD": data
+        }
 
 if __name__ == "__main__":
     PLAT = 'bfx'
@@ -260,10 +320,13 @@ if __name__ == "__main__":
     #     ticker_price = bfx.get_symb_tick(symb)
     #     if ticker_price :
     #         #to db
-    #         banDao.insertTicker(up_tm, PLAT, up_tm, mkt.split('/')[0], mkt, ticker_price[0],ticker_price[1],ticker_price[2] )
+    #         banDao.insertTicker(PLAT, up_tm, mkt.split('/')[0], mkt, ticker_price[0],ticker_price[1],ticker_price[2] )
     #         print "ticker_price----------->", ticker_price
 
-    # banDao.selectPlat(PLAT)
+    # banDao.selectTickers(PLAT)
+
+    #行情订单
+    # bfx.get_trades(markets['eos/usd'])
 
 
     # #账户信息
@@ -273,11 +336,17 @@ if __name__ == "__main__":
     # banDao.selectCount('BTC')
 
 
-    #我的订单信息
+    # 我的订单信息
     banDao.createMyOrder()
     myOdrLs = bfx.get_act_orders()
-    # banDao.insertAccount(PLAT, up_tm, accountDic)
-    # banDao.selectCount('BTC')
+    print 'myOdrLs-----------------', myOdrLs
+    banDao.insertMyOrder(PLAT, up_tm, myOdrLs)
+    banDao.selectMyOrder(PLAT)
+
+
+    #创建订单
+    # print '===>', bfx.place_order('13','8','buy','exchange limit', markets['eos/usd'])
+
 
 
 

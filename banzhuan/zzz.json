@@ -1,0 +1,57 @@
+{u'result': {u'coins': [
+            {u'available': u'0.00000000', u'freez': u'0.00000000', u'unitTag': u'QC', u'isCanRecharge':
+    True, u'unitDecimal': 8, u'key': u'qc', u'cnName': u'QC', u'isCanWithdraw': True, u'enName': u'QC'
+            },
+            {u'available': u'55140.6216047', u'freez': u'0.00000000', u'unitTag': u'$', u'isCanRecharge': True, u'unitDecimal': 8, u'key': u'usdt', u'cnName': u'USDT', u'isCanWithdraw': False, u'enName': u'USDT'
+            },
+            {u'available': u'0.00003273', u'freez': u'0.00000000', u'unitTag': u'\u0e3f', u'isCanRecharge': True, u'unitDecimal': 8, u'key': u'btc', u'cnName': u'BTC', u'isCanWithdraw': True, u'enName': u'BTC'
+            },
+            {u'available': u'0.00000000', u'freez': u'0.00000000', u'unitTag': u'BCC', u'isCanRecharge': True, u'unitDecimal': 8, u'key': u'bcc', u'cnName': u'BCC', u'isCanWithdraw': True, u'enName': u'BCC'
+            },
+            {u'available': u'0.00009', u'freez': u'0.00000000', u'unitTag': u'UBTC', u'isCanRecharge': False, u'unitDecimal': 8, u'key': u'ubtc',
+    u'cnName': u'UBTC', u'isCanWithdraw': False, u'enName': u'UBTC'
+            },
+            {u'available': u'0.00000000', u'freez': u'0.00000000', u'unitTag': u'\u0141', u'isCanRecharge': True, u'unitDecimal': 8, u'key': u'ltc', u'cnName': u'LTC', u'isCanWithdraw': True, u'enName': u'LTC'
+            },
+            {u'available': u'20.625419', u'freez': u'0.00000000', u'unitTag': u'E', u'isCanRecharge': True, u'unitDecimal': 8, u'key': u'eth', u'cnName': u'ETH', u'isCanWithdraw': True, u'enName': u'ETH'
+            },
+            {u'available': u'200.3989597', u'freez': u'0.00000000', u'unitTag': u'E', u'isCanRecharge': True, u'unitDecimal': 8, u'key': u'etc', u'cnName': u'ETC', u'isCanWithdraw': True, u'enName': u'ETC'
+            },
+            {u'available': u'39963.996', u'freez':
+    u'0.00000000', u'unitTag': u'BTS', u'isCanRecharge': True, u'unitDecimal': 8, u'key': u'bts', u'cnName': u'BTS', u'isCanWithdraw': True, u'enName': u'BTS'
+            },
+            {u'available': u'0.07', u'freez': u'0.00000000', u'unitTag': u'EOS', u'isCanRecharge': True, u'unitDecimal': 8, u'key': u'eos', u'cnName': u'EOS', u'isCanWithdraw': True, u'enName': u'EOS'
+            },
+            {u'available': u'0.00000000', u'freez': u'0.00000000', u'unitTag': u'QTUM', u'isCanRecharge': True, u'unitDecimal': 8, u'key': u'qtum', u'cnName': u'QTUM', u'isCanWithdraw': True, u'enName': u'QTUM'
+            },
+            {u'available': u'44.98497', u'freez': u'0.00000000', u'unitTag': u'HSR', u'isCanRecharge': True, u'unitDecimal': 8, u'key': u'hsr', u'cnName': u'HSR', u'isCanWithdraw': True, u'enName': u'HSR'
+            },
+            {u'available': u'9992.997', u'freez': u'0.00000000', u'unitTag': u'XRP', u'isCanRecharge': True, u'unitDecimal': 8, u'key': u'xrp', u'cnName': u'XRP', u'isCanWithdraw': False, u'enName': u'XRP'
+            },
+            {u'available': u'0.00000000', u'freez': u'0.00000000', u'unitTag': u'BCD', u'isCanRecharge': False, u'unitDecimal': 8, u'key': u'bcd', u'cnName': u'BCD', u'isCanWithdraw':
+    False, u'enName': u'BCD'
+            },
+            {u'available': u'0.00000000', u'freez': u'0.00000000', u'unitTag': u'DASH', u'isCanRecharge': True, u'unitDecimal': 8, u'key': u'dash', u'cnName': u'DASH', u'isCanWithdraw': True, u'enName': u'DASH'
+            },
+            {u'available': u'0.00000000', u'freez': u'0.00000000', u'unitTag': u'ZBBTC', u'isCanRecharge': False, u'unitDecimal': 8, u'key': u'zbbtc', u'cnName': u'ZBBTC', u'isCanWithdraw': False, u'enName': u'ZBBTC'
+            },
+            {u'available': u'0.00009', u'freez': u'0.00000000', u'unitTag': u'SBTC', u'isCanRecharge': False, u'unitDecimal': 8, u'key': u'sbtc', u'cnName': u'SBTC', u'isCanWithdraw': False, u'enName': u'SBTC'
+            },
+            {u'available': u'0.00000000', u'freez': u'0.00000000', u'unitTag': u'INK', u'isCanRecharge': True, u'unitDecimal': 8, u'key': u'ink', u'cnName': u'INK', u'isCanWithdraw': True, u'enName': u'INK'
+            },
+            {u'available': u'0.00000000', u'freez': u'0.00000000', u'unitTag': u'TV', u'isCanRecharge': True, u'unitDecimal': 8, u'key': u'tv', u'cnName': u'TV', u'isCanWithdraw': False, u'enName': u'TV'
+            },
+            {u'available': u'0.9', u'freez': u'0.00000000', u'unitTag': u'BCX', u'isCanRecharge':
+    False, u'unitDecimal': 8, u'key': u'bcx', u'cnName': u'BCX', u'isCanWithdraw': False, u'enName': u'BCX'
+            },
+            {u'available': u'0.009', u'freez': u'0.00000000', u'unitTag': u'BTH', u'isCanRecharge': False, u'unitDecimal': 8, u'key': u'bth', u'cnName': u'BTH', u'isCanWithdraw': False, u'enName': u'BTH'
+            },
+            {u'available': u'0.00009', u'freez': u'0.00000000', u'unitTag': u'LBTC', u'isCanRecharge': False, u'unitDecimal': 8,
+    u'key': u'lbtc', u'cnName': u'LBTC', u'isCanWithdraw': False, u'enName': u'LBTC'
+            },
+            {u'available': u'0.00000000', u'freez': u'0.00000000', u'unitTag': u'ETF', u'isCanRecharge': False, u'unitDecimal': 8, u'key': u'etf', u'cnName': u'\u4ee5\u592a\u96fe', u'isCanWithdraw': False, u'enName': u'ETF'
+            }
+        ], u'base': {u'username': u'18501735859', u'trade_password_enabled': True, u'auth_google_enabled': False, u'auth_mobile_enabled': True
+        }
+    }
+}
