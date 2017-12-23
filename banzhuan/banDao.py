@@ -2,7 +2,7 @@
 
 import sqlite3
 import sys
-import os
+import os,time
 
 
 reload(sys)
@@ -18,8 +18,8 @@ class banDao(object):
 
     @staticmethod
     def createTicker():
-        if os.path.isfile(DB_TICKER):
-            os.remove(DB_TICKER)
+        # if os.path.isfile(DB_TICKER):
+        #     os.remove(DB_TICKER)
 
         conn = sqlite3.connect(DB_TICKER)
         # ticker    id     INT PRIMARY KEY     NOT NULL,
@@ -38,8 +38,8 @@ class banDao(object):
 
     @staticmethod
     def createAccount():
-        if os.path.isfile(DB_ACCOUNT):
-            os.remove(DB_ACCOUNT)
+        # if os.path.isfile(DB_ACCOUNT):
+        #     os.remove(DB_ACCOUNT)
 
         conn = sqlite3.connect(DB_ACCOUNT)
         # account        id     INT PRIMARY KEY     NOT NULL,
@@ -137,29 +137,30 @@ class banDao(object):
         conn = sqlite3.connect(DB_TICKER)
         print "Opened database successfully"
 
-        sel_sql = "SELECT id, plat, market, up_tm  from tb_ticker where plat='%s' and market='%s';" % (
+        sel_sql = "SELECT up_tm, bid, ask, last from tb_ticker where plat='%s' and market='%s';" % (
             plat, market)
         # print '-sel_sql-------------', sel_sql
-
         cursor = conn.execute(sel_sql)
-        for row in cursor:
-            print '-zzz-------------'
-            print "ID = ", row[0]
-            print "plat = ", row[1]
-            print "market = ", row[2]
-            print "up_tm = ", row[3]
 
-        # sql_cur = conn.cursor()
-        # sql_cur.execute(sel_sql)
-        # rows = sql_cur.fetchall()
-        # for row in rows:
-        #     print '-zzz-------------'
-        #     print "ID = ", row[0]
-        #     print "plat = ", row[1]
-        #     print "market = ", row[2]
-        #     print "up_tm = ", row[3]
-        # sql_cur.close()
+        res = None
+        now = int(time.time())
+        for row in cursor:
+            up_tm = row[0]
+            bid = row[1]
+            ask = row[2]
+            last = row[3]
+
+            # if (now - up_tm) < 0 or (now - up_tm)> 20 :
+            #     print u'市场买卖价格数据未更新。。。'
+            #     break
+            if  bid == None  or ask == None or last == None :
+                print u'市场买卖价格数据有误。。。'
+                break
+            
+            res = (bid, ask, last)
+            break    
         conn.close()
+        return res
 
     @staticmethod
     def selectTickers(plat):
@@ -174,15 +175,25 @@ class banDao(object):
 
 
     @staticmethod
-    def selectCount(coin):
+    def selectCount(plat, coin):
         conn = sqlite3.connect(DB_ACCOUNT)
-        sel_sql = "SELECT  plat, balance from tb_account where coin='%s';" % (
-            coin)
+        sel_sql = "SELECT  up_tm, balance from tb_account where plat = '%s' and coin='%s';" % (
+            plat, coin)
         # print '-sel_sql-------------', sel_sql
+        balance = 0.0
         cursor = conn.execute(sel_sql)
+        now = int(time.time())
         for row in cursor:
             print 'row ======>', row[0], float(row[1])
+            up_tm = row[0]
+            # if (now - up_tm) < 0 or (now - up_tm)> 20 :
+            #     print u'账户信息未更新。。。'
+            #     break
+
+            balance = row[1]
+            break
         conn.close()
+        return balance
 
 
 

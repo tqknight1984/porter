@@ -8,6 +8,8 @@ import subprocess
 from request_call import request_call
 
 from banDao import banDao
+from zb_api import zb_api
+from bfx_api import bfx_api
 import conf
 
 reload(sys)
@@ -137,12 +139,7 @@ class zb_api:
 
 
     #委托下单
-    def new_order(self,currency,price,amount, type):
-        tradeType = -1
-        if type == 'buy' :
-            tradeType = 1
-        if type == 'sell' :
-            tradeType = 0
+    def request_order(self,currency,price,amount,tradeType):
         dict={"accesskey":str(self.access_key),"currency":currency,"price":price,"amount":amount,"tradeType":tradeType,"method":"order"}
         url=self.host+'/order'
         signature=self.zb_signature(dict)
@@ -204,64 +201,107 @@ class zb_api:
 
 
 if __name__ == "__main__":
-    PLAT = 'zb'
-    markets = {
-        'btc/usdt': 'btc_usdt',
-        'bcc/usdt': 'bcc_usdt',
-        'bcc/btc': 'bcc_usdt',
-        'ltc/usdt': 'ltc_usdt',
-        'ltc/btc': 'ltc_btc',
-        'eos/usdt': 'eos_usdt',
-        'eos/btc': 'eos_btc',
-        'eth/usdt': 'eth_usdt',
-        'eth/btc': 'eth_btc',
-        'etc/usdt': 'etc_usdt',
-        'etc/btc': 'etc_btc',
-        'qtum/usdt': 'qtum_usdt',
-        'qtum/btc': 'qtum_btc',
-        'xrp/usdt': 'xrp_usdt',
-        'xrp/btc': 'xrp_btc',
-    }
-
-    # ord_buy = 1
-    # ord_sell = 0
-
-    zb = zb_api()
+    zb_plat='zb'
+    bfx_plat='bfx'
+    ban_ls=[
+        {   
+        'market':'btc/usdt',
+        'zb_symb':'btc_usdt',
+        'bfx_symb':'tBTCUSD',
+        'direction':'zb2bfx',
+        'limit_perc':10,
+        'trade_amount':0.2,
+        'margin_perc':0.05,
+        },
+        {   
+        'market':'eos/usdt',
+        'zb_symb':'eos_usdt',
+        'bfx_symb':'tEOSUSD',
+        'direction':'zb2bfx',
+        'limit_perc':10,
+        'trade_amount':10.0,
+        'margin_perc':0.05,
+        },
+    ]
+   
 
     banDao.createTicker()
 
     up_tm = int(time.time())
     print 'curtm------->', up_tm
 
+    for ban_ele in ban_ls :
+        market = ban_ele['market']
+        zb_symb = ban_ele['zb_symb']
+        bfx_symb = ban_ele['bfx_symb']
+        direction = ban_ele['direction']
+        limit_perc = ban_ele['limit_perc']
+        trade_amount = ban_ele['trade_amount']
+        margin_perc = ban_ele['margin_perc']
 
-    # #行情最新买卖价格
-    # for mkt, symb in markets.items():
-    #     print mkt, "------>", symb
-    #     # 市场的最新买卖价格
-    #     ticker_price = zb.getZbTicker(symb)
-    #     if ticker_price:
-    #         # to db
-    #         banDao.insertTicker(PLAT, up_tm, mkt.split('/')[0], mkt, ticker_price[0], ticker_price[1], ticker_price[2])
-    #         print "ticker_price----------->", ticker_price
+        ban_flag = 0
+        zb_trick = banDao.selectTicker(zb_plat,market)
+        bfx_trick = banDao.selectTicker(bfx_plat,market)
 
-    # banDao.selectTickers(PLAT)
+        #差价条件
+        if ban_flag == 0 :
+            if zb_trick and bfx_trick :
+                #比较差价 zb sell and bfx buy
+                if direction == 'zb2bfx' :
+                    off = zb_trick[1] - bfx_trick[0]
+                    avg = (zb_trick[1] + bfx_trick[0]) / 2
+                    perc = 100 * off / avg
+                    if prec >= limit_perc :
+                        ban_flag = 1
+        
+        if ban_flag != 1 or ban_flag != 2 :
+            print u'差价条件不通过'
+            continue
+
+        zb_account = banDao.selectCount(zb_plat, market.split('/')[0])
+        bfx_account = banDao.selectCount(bfx_plat, market.split('/')[1])
+
+        #账户条件
+        if ban_flag == 1 :
+            if direction == 'zb2bfx' :
+                if zb_account >= trade_amount:
+                    if bfx_account >= (bfx_trick[0] * trade_amount) :
+                        ban_flag = 3
 
 
+        if ban_flag != 3 or ban_flag != 4 :
+            print u'账户条件不通过'
+            continue
 
-    # #账户信息
-    # banDao.createAccount()
-    # accountDic = zb.get_account_info()
-    # print "accountDic----------->", accountDic
-    # banDao.insertAccount(PLAT, up_tm, accountDic)
-    # banDao.selectCount('BTC')
+        if ban_flag == 3 :
+            sell_price = zb_trick[1] - (zb_trick[1] *  margin_perc)
+            if sell_price > 0 :
+                sell_id = zb_api().new_order(zb_symb, sell_price, trade_amount, 'sell')
+                if sell_id > 0 :
+                    buy_price = bfx_trick[0] + (bfx_trick[0] * margin_perc)
+                    buy_id = bfx_api().new_order(trade_amount, buy_price,'buy', bfx_symb)
+                    if buy_id > 0 :
+                        ban_flag =5
 
-    #  # 获取委托买单或卖单
-    # banDao.createMyOrder()
-    # oders = zb.get_oders(markets['eos/usdt'])
-    # print 'oders-----------------', oders
-    # banDao.insertMyOrder(PLAT, up_tm, oders)
-    # banDao.selectMyOrder(PLAT)
+        if ban_flag != 5 or ban_flag != 6 :
+            print u'挂单失败'
+            continue
 
-    #创建订单
-    id = zb.new_order(markets['eos/usdt'],'7.5','12', 'buy' )
-    print '===>', int(id)
+                
+                
+                
+            
+
+
+                        
+                    
+            
+            
+        #取两边最新价格，判断谁买谁卖
+
+        #判断差价是否满足要求
+
+        #判断最新买价卖价的差价
+
+        #判断是否有足够的币，足够的usdt，btc
+

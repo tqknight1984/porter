@@ -16,7 +16,7 @@ import conf
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
-class BfxTicker(object):
+class bfx_api(object):
     BASE_URL = "https://api.bitfinex.com/"
     KEY=conf.BFX_KEY
     SECRET=conf.BFX_SECRET
@@ -251,7 +251,7 @@ class BfxTicker(object):
         print 'symbol----------',symbol
         return symbol
 
-    def place_order(self, amount, price, side, ord_type, symbol, exchange='bitfinex'):
+    def new_order(self, amount, price, side,  symbol):
         symbol = self.getV1Symbol(symbol)
 
         payload = {
@@ -309,7 +309,7 @@ if __name__ == "__main__":
         'xrp/usdt':'tXRPUSD',
         'xrp/btc':'tXRPBTC',
         }
-    bfx = BfxTicker()
+    bfx = bfx_api()
 
     banDao.createTicker()
     up_tm = int(time.time())
@@ -336,16 +336,16 @@ if __name__ == "__main__":
     # banDao.selectCount('BTC')
 
 
-    # 我的订单信息
-    banDao.createMyOrder()
-    myOdrLs = bfx.get_act_orders()
-    print 'myOdrLs-----------------', myOdrLs
-    banDao.insertMyOrder(PLAT, up_tm, myOdrLs)
-    banDao.selectMyOrder(PLAT)
+    # # 我的订单信息
+    # banDao.createMyOrder()
+    # myOdrLs = bfx.get_act_orders()
+    # print 'myOdrLs-----------------', myOdrLs
+    # banDao.insertMyOrder(PLAT, up_tm, myOdrLs)
+    # banDao.selectMyOrder(PLAT)
 
 
     #创建订单
-    # print '===>', bfx.place_order('13','8','buy','exchange limit', markets['eos/usd'])
+    # print '===>', bfx.new_order('13','8','buy','exchange limit', markets['eos/usd'])
 
 
 
