@@ -225,13 +225,12 @@ if __name__ == "__main__":
     ]
    
 
-    banDao.createTicker()
-
     up_tm = int(time.time())
     print 'curtm------->', up_tm
 
     for ban_ele in ban_ls :
         market = ban_ele['market']
+        coin = market.split('/')[0]
         zb_symb = ban_ele['zb_symb']
         bfx_symb = ban_ele['bfx_symb']
         direction = ban_ele['direction']
@@ -251,40 +250,56 @@ if __name__ == "__main__":
                     off = zb_trick[1] - bfx_trick[0]
                     avg = (zb_trick[1] + bfx_trick[0]) / 2
                     perc = 100 * off / avg
-                    if prec >= limit_perc :
+                    if perc >= limit_perc :
                         ban_flag = 1
         
         if ban_flag != 1 or ban_flag != 2 :
-            print u'差价条件不通过'
+            print u'差价条件不通过', market
+            continue
+
+
+        #是否有未完成的挂单
+        if ban_flag == 1 :
+            myods = banDao.selectMyOrder(coin)
+            if len(myods) == 0 :
+                ban_flag = 3
+
+
+        if ban_flag != 3 or ban_flag != 4 :
+            print u'有未完成的挂单', market
             continue
 
         zb_account = banDao.selectCount(zb_plat, market.split('/')[0])
         bfx_account = banDao.selectCount(bfx_plat, market.split('/')[1])
 
         #账户条件
-        if ban_flag == 1 :
+        if ban_flag == 3 :
             if direction == 'zb2bfx' :
                 if zb_account >= trade_amount:
                     if bfx_account >= (bfx_trick[0] * trade_amount) :
-                        ban_flag = 3
+                        ban_flag = 5
 
-
-        if ban_flag != 3 or ban_flag != 4 :
-            print u'账户条件不通过'
-            continue
-
-        if ban_flag == 3 :
-            sell_price = zb_trick[1] - (zb_trick[1] *  margin_perc)
-            if sell_price > 0 :
-                sell_id = zb_api().new_order(zb_symb, sell_price, trade_amount, 'sell')
-                if sell_id > 0 :
-                    buy_price = bfx_trick[0] + (bfx_trick[0] * margin_perc)
-                    buy_id = bfx_api().new_order(trade_amount, buy_price,'buy', bfx_symb)
-                    if buy_id > 0 :
-                        ban_flag =5
 
         if ban_flag != 5 or ban_flag != 6 :
-            print u'挂单失败'
+            print u'账户条件不通过', market
+            continue
+
+        if ban_flag == 5 :
+            sell_price = zb_trick[1] - (zb_trick[1] *  margin_perc)
+            if sell_price > 0 :
+                # sell_id = zb_api().new_order(zb_symb, sell_price, trade_amount, 'sell')
+                sell_id = 1
+                print (u'>>> >>> 挂单 ZB %s %s sell %s个 ' % (zb_symb, sell_price, trade_amount))
+                if sell_id > 0 :
+                    buy_price = bfx_trick[0] + (bfx_trick[0] * margin_perc)
+                    # buy_id = bfx_api().new_order(trade_amount, buy_price,'buy', bfx_symb)
+                    buy_id = 1
+                    print (u'>>> >>> 挂单 BFX %s %s buy %s个 ' % (bfx_symb, buy_price, trade_amount))
+                    if buy_id > 0 :
+                        ban_flag =7
+
+        if ban_flag != 7 or ban_flag != 8 :
+            print u'挂单失败', market
             continue
 
                 

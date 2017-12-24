@@ -6,7 +6,7 @@ import hashlib
 import hmac
 import time #for nonce
 import os
-import sys
+import sys, getopt
 import subprocess
 
 from banDao import banDao
@@ -50,9 +50,9 @@ class bfx_api(object):
     def api_post(self, path, body={}):
         nonce = self._nonce()
         rawBody = json.dumps(body)
-        print("rawBody-------->"+rawBody)
+        # print("rawBody-------->"+rawBody)
         headers = self._headers(path, nonce, rawBody)
-        print("url-------->"+self.BASE_URL + path)
+        # print("url-------->"+self.BASE_URL + path)
 
         # print("requests.post("+self.BASE_URL + path + ", headers=" + str(headers) + ", data=" + rawBody + ", verify=True)")
         r = requests.post(self.BASE_URL + path, headers=headers, data=rawBody, verify=True)
@@ -99,22 +99,37 @@ class bfx_api(object):
         try:
             url = "https://api.bitfinex.com/%s?%s" % (path, params)
             res = requests.get(url)
+            # print '------16----->',res.text
             return json.loads(res.text)
         except Exception as e :
             print e
         return None
 
+    # #取当前行情 (买卖价格)
+    # def get_symb_tick(self, symb):
+    #     # path = 'v2/ticker/%s' % symb
+    #     # path = 'tickers'
+    #     res =  self.api_get(path)
+    #     print '------17----->',res
+    #     if res :
+    #         # 买 卖  最新
+    #         return (float(res[0]), float(res[2]), float(res[6]) )
+    #     else :
+    #         return None
+
     #取当前行情 (买卖价格)
     def get_symb_tick(self, symb):
-        path = 'v2/ticker/%s' % symb
-        # path = 'tickers'
+        symb = symb[1:]
+        path = 'v1/pubticker/%s' % symb
         res =  self.api_get(path)
-        print '------17----->',res
+        # print 'BFX ticker------------->', res
         if res :
             # 买 卖  最新
-            return (res[0], res[2], res[6])
+            return (float(res['bid']), float(res['ask']), float(res['last_price']) )
         else :
             return None
+        
+        
 
      #取当前行情订单
     def get_trades(self, symb):
@@ -124,7 +139,7 @@ class bfx_api(object):
         res =  self.api_get(path)
         print '------19----->',res
         if res :
-            return (res[0], res[2], res[6])
+            return (float(res[0]), float(res[2]), float(res[6]))
         else :
             return None
 
@@ -197,18 +212,18 @@ class bfx_api(object):
         active_orders = []
         path = "v2/auth/r/orders"
         res = self.api_post(path = path)
-        print 'get_act_orders--------->',res
+        # print 'get_act_orders--------->',res
         for info in res :
             # symbols = info[3]
             odr = {}
             status = info[13]
             odr['status'] = status
             coin = info[3]
-            print 'coin---1------>',coin
+            # print 'coin---1------>',coin
             coin = coin[1:]
             coin = coin.replace('BTC','')
             coin = coin.replace('USD','')
-            print 'coin---2------>',coin
+            # print 'coin---2------>',coin
             odr['coin'] = coin
             odr['market'] = info[3]
             side = 'none'
@@ -292,6 +307,11 @@ class bfx_api(object):
             "X-BFX-PAYLOAD": data
         }
 
+    def outputJs(self, jspath, body):
+        with open(jspath,'w') as fo :
+            fo.write(body)
+            fo.close()
+
 if __name__ == "__main__":
     PLAT = 'bfx'
     markets={
@@ -311,8 +331,64 @@ if __name__ == "__main__":
         }
     bfx = bfx_api()
 
-    banDao.createTicker()
     up_tm = int(time.time())
+    
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], "tamg", ["ticker","account","myorder","generator"])
+    except getopt.GetoptError, err:
+        print str(err)
+        sys.exit(2)
+    
+    for name, value in opts:
+        #行情最新买卖价格
+        if name in ('-t','--ticker'):
+            print 'query--BFX----->ticker'
+            banDao.createTicker()
+            for mkt, symb in markets.items():
+                # print mkt, "------>", symb
+                ticker_price = bfx.get_symb_tick(symb)
+                if ticker_price:
+                    # to db
+                    banDao.insertTicker(PLAT, up_tm, mkt.split('/')[0], mkt, ticker_price[0],ticker_price[1],ticker_price[2] )
+                    # print "ticker_price----------->", ticker_price
+                time.sleep(1)
+
+        elif name in ('-a','--account'):
+            print '>>> >>> query--BFX------->account'
+            banDao.createAccount()
+            account_ls = bfx.get_account_wallet()
+            banDao.insertAccount(PLAT, up_tm, account_ls)
+        elif name in ('-m','--myorder'):
+            print '>>> >>> query--BFX------->myorder'
+            banDao.createMyOrder()
+            oders = bfx.get_act_orders()
+            banDao.deleteMyOrder(PLAT)
+            banDao.insertMyOrder(PLAT, up_tm, oders)
+
+        elif name in ('-g','--generator'):
+            data={}
+            nginx_path = '/data/app/nginx/html/'
+            tm_str = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+
+            print 'curtm------->',tm_str
+
+            for mkt, symb in markets.items() :
+                # last = bz.getZbTicker(mkt)
+                ticker = banDao.selectTicker(PLAT, mkt)
+                data[mkt] = ticker
+                print ticker
+
+            data['up_tm'] = tm_str
+
+            temp_file = nginx_path + time.strftime("v2_bfx_%Y%m%d%H%M%S.js", time.localtime())
+            outStr = "bfx_ticker = %s" % json.dumps(data)
+            bfx.outputJs(temp_file, outStr)
+
+            subprocess.call("cp -rf " + temp_file + " " + nginx_path + "/v2_bfx.js", shell=True);
+            subprocess.call("rm -rf " + temp_file , shell=True);
+        else:
+            print 'unhandled option'
+            assert False, "unhandled option"
 
     # for mkt, symb in markets.items():
     #     print mkt,"------>",symb

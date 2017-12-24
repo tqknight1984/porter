@@ -11,8 +11,8 @@ class request_call(object):
     @staticmethod
     def zb_call(host,payload):
         try:
-            print 'host------------->', host
-            print 'payload------------->', payload
+            # print 'host------------->', host
+            # print 'payload------------->', payload
 
             response=requests.get(host,payload,timeout=timeout)
             response.raise_for_status()
@@ -28,6 +28,7 @@ class request_call(object):
 
         except ValueError as e:
             print(e)
+
     @staticmethod
     def zb_proxy_call(host,payload):
         try:

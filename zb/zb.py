@@ -60,7 +60,6 @@ if __name__ == "__main__":
     
     nginx_path = '/data/app/nginx/html/'
     tm = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-    data = {'up_tm':tm}
 
     print 'curtm------->',tm
     bz = bfx2zb()
