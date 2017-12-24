@@ -49,9 +49,11 @@
           <thead>
             <th width="" class="">交易对</th>
             {% for plat in vs.platform -%}
-            <th width="" class="">平台：{{plat}}<br><span id='{{plat}}_tm_{{vs.idx}}'>{{plat}}_last_time</th>
+            <th width="" class="">{{plat}} <span id='{{plat}}_tm_{{vs.idx}}'>{{plat}}_last_time</span><br>
+              买价/卖价
+            </th>
             {% endfor -%}
-            <th width="" class="">差价<span class="text-error">?大于3%</span>
+            <th width="" class="">zb卖bfx买/bfx买zb卖<span class="text-error">?大于3%</span>
               <span class="text-info">   =百分比</span><span class="muted">?小于0</span></th>
           </thead>
           <tbody>
@@ -76,9 +78,8 @@
     {% endfor -%}
     
   </body>
-  <script src="./zb.js?v={{ver}}"></script>
-  <script src="./bfx.js?v={{ver}}"></script>
-  <script src="./ba.js?v={{ver}}"></script>
+  <script src="./v2_zb.js?v={{ver}}"></script>
+  <script src="./v2_bfx.js?v={{ver}}"></script>
 
   <script>
     $(function(){
@@ -87,17 +88,19 @@
         {% for plat in vs.platform -%}
           $('#{{plat}}_tm_{{vs.idx}}').text({{plat}}_ticker['up_tm']);
           {% for market in vs.markets -%}
-          $('#{{plat}}_{{market}}_{{vs.idx}}').text({{plat}}_ticker['{{market}}']);
+          $('#{{plat}}_{{market}}_{{vs.idx}}').text({{plat}}_ticker['{{market}}'][0] + "/"+ {{plat}}_ticker['{{market}}'][1]);
           {% endfor -%}
         {% endfor -%}
 
         {% for market in vs.markets -%}
           var off_str = 'null'
           if ( {{vs.platform[0]}}_ticker['{{market}}']  && {{vs.platform[1]}}_ticker['{{market}}'] ) {
-            var v1 = {{vs.platform[0]}}_ticker['{{market}}'];
-            var v2 = {{vs.platform[1]}}_ticker['{{market}}'];
+            var p1v1 = {{vs.platform[0]}}_ticker['{{market}}'][0];
+            var p1v2 = {{vs.platform[0]}}_ticker['{{market}}'][1];
+            var p2v1 = {{vs.platform[1]}}_ticker['{{market}}'][0];
+            var p2v2 = {{vs.platform[1]}}_ticker['{{market}}'][1];
             var pot = 0;
-            var v_str = (v1 + "").length <= (v2 + "").length ?  (v1 + "") : (v2 + "");
+            var v_str = (p1v1 + "").length <= (p2v1 + "").length ?  (p1v1 + "") : (p2v1 + "");
             var start = v_str.indexOf(".");
             if( start != -1){
               pot = v_str.substring(start+1, v_str.length).length

@@ -273,7 +273,7 @@ if __name__ == "__main__":
             for mkt, symb in markets.items() :
                 # last = bz.getZbTicker(mkt)
                 ticker = banDao.selectTicker(PLAT, mkt)
-                data[mkt] = ticker
+                data[mkt.replace("/","_")] = ticker
                 print ticker
 
             data['up_tm'] = tm_str
