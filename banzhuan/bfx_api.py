@@ -266,6 +266,25 @@ class bfx_api(object):
         print 'symbol----------',symbol
         return symbol
 
+    
+    def get_balance(self):
+        payload = {
+            "request": "/v1/balances",
+            "nonce": str(time.time()),
+        }
+
+        signed_payload = self._sign_payload(payload)
+        r = requests.post(self.BASE_URL + "v1/balances", headers=signed_payload, verify=True)
+        json_resp = r.json()
+
+        try:
+            if type(json_resp) is type([]):
+                print "nice"
+        except:
+            return json_resp['message']
+
+        return json_resp
+
     def new_order(self, amount, price, side,  symbol):
         symbol = self.getV1Symbol(symbol)
 
@@ -330,6 +349,8 @@ if __name__ == "__main__":
         'xrp/btc':'tXRPBTC',
         }
     bfx = bfx_api()
+    balance = bfx.get_balance()
+    print "--------",balance
 
     up_tm = int(time.time())
     
@@ -367,21 +388,40 @@ if __name__ == "__main__":
 
         elif name in ('-g','--generator'):
             data={}
+            account={}
+            myorder=""
             nginx_path = '/data/app/nginx/html/'
             tm_str = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
 
             print 'curtm------->',tm_str
 
+            #买卖信息
             for mkt, symb in markets.items() :
                 # last = bz.getZbTicker(mkt)
                 ticker = banDao.selectTicker(PLAT, mkt)
-                data[mkt.replace("/","_")] = ticker
+                mkt_js = mkt.replace("/","_")
+                data[mkt_js] = ticker
                 print ticker
 
+                #
+                coin = mkt.split('/')[0].upper();
+                balance = banDao.selectCount(PLAT,coin)
+                account[coin] = balance
+
+                myord = banDao.selectMyOrderByPlat(PLAT)
+                for ord in myord :
+                    myorder += "<li>%s %s %s %s %s %s </li>" % (PLAT, ord['market'], ord['price'], ord['side'], ord['amount'] )
+
+
             data['up_tm'] = tm_str
+            account['up_tm'] = tm_str
 
             temp_file = nginx_path + time.strftime("v2_bfx_%Y%m%d%H%M%S.js", time.localtime())
-            outStr = "bfx_ticker = %s" % json.dumps(data)
+            outStr = """
+            bfx_ticker = %s;
+            bfx_account = %s;
+            bfx_myorder = %s;
+            """ % (json.dumps(data), json.dumps(account), myorder )
             bfx.outputJs(temp_file, outStr)
 
             subprocess.call("cp -rf " + temp_file + " " + nginx_path + "/v2_bfx.js", shell=True);
