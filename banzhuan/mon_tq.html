@@ -41,33 +41,35 @@
       </div>
     </div>
 
-    {% for vs in vs_pairs -%}
+    <!--差价表-->
     <div class="row-fluid">
       <div class="span12">
-        <h4>{{vs.name}}</h4>
+        <h4>{{vs_name}}</h4>
         <table class="table table-bordered table-condensed table-striped sortable">
           <thead>
             <th width="" class="">交易对</th>
-            {% for plat in vs.platform -%}
-            <th width="" class="">{{plat}} <span id='{{plat}}_tm_{{vs.idx}}'>{{plat}}_last_time</span><br>
-              买价/卖价
+            {% for plat in platform -%}
+            <th width="" class="">{{plat}}: (买价, 卖价) <br>
+              <span class="muted" >持有</span>
             </th>
             {% endfor -%}
-            <th width="" class="">zb卖bfx买/bfx买zb卖<span class="text-error">?大于3%</span>
-              <span class="text-info">   =百分比</span><span class="muted">?小于0</span></th>
+            <th width="" class=""> bfx买zb卖<span class="text-error">?大于10%</span><br>
+              zb买bfx卖<span class="text-success">?大于0%</span></th>
           </thead>
           <tbody>
-            {% for market in vs.markets -%}
+            {% for market in markets -%}
             <tr>
               <td>
                 {{market}}
               </td>
-              {% for plat in vs.platform -%}
-              <td><span id='{{plat}}_{{market}}_{{vs.idx}}'>{{plat}}_{{market}}</span></td>
+              {% for plat in platform -%}
+              <td><span id='{{plat}}_{{market}}'>{{plat}}_{{market}}</span><br>
+                <span  class="muted" id='{{plat}}_balance_{{market}}'>0.0</span>
+              </td>
               {% endfor -%}
               <td>
-                <span id='{{market}}_off_{{vs.idx}}'>{{market}}_off</span>
-                <span id='{{market}}_percent_{{vs.idx}}' class="text-info"></span>
+                <span id='{{market}}_off1'>{{market}}_off1</span><br>
+                <span id='{{market}}_off2'>{{market}}_off2</span>
               </td>
             </tr>
             {% endfor -%}
@@ -75,57 +77,51 @@
         </table>
       </div>
     </div> 
-    {% endfor -%}
     
+    <!--我的挂单-->
+    <div class="row-fluid">
+      <div class="span12">
+          <h4>未完成的挂单</h4>
+          <ul class="unstyled" id="{{plat}}_myorder">
+          {% for odr in myorders -%}
+          <li >{{odr['side']}}</li>
+          {% endfor -%}
+          </ul>
+      </div>
+    </div>
+
   </body>
-  <script src="./v2_zb.js?v={{ver}}"></script>
-  <script src="./v2_bfx.js?v={{ver}}"></script>
 
   <script>
     $(function(){
-      {% for vs in vs_pairs -%}
 
-        {% for plat in vs.platform -%}
-          $('#{{plat}}_tm_{{vs.idx}}').text({{plat}}_ticker['up_tm']);
-          {% for market in vs.markets -%}
-          $('#{{plat}}_{{market}}_{{vs.idx}}').text({{plat}}_ticker['{{market}}'][0] + "/"+ {{plat}}_ticker['{{market}}'][1]);
+        {% for plat in platform -%}
+          {% for market in markets -%}
+          //ticker
+          $('#{{plat}}_{{market}}').text( {{ticker_dic}}['{{plat}}_{{market}}'] );
+           // balance
+          coin = '{{market}}'.split('_')[0];
+          coin = coin.toLowerCase();
+          $('#{{plat}}_balance_{{market}}').text( {{account_dic}}['{{plat}}_'+coin] );
+
           {% endfor -%}
         {% endfor -%}
 
         {% for market in vs.markets -%}
-          var off_str = 'null'
-          if ( {{vs.platform[0]}}_ticker['{{market}}']  && {{vs.platform[1]}}_ticker['{{market}}'] ) {
-            var p1v1 = {{vs.platform[0]}}_ticker['{{market}}'][0];
-            var p1v2 = {{vs.platform[0]}}_ticker['{{market}}'][1];
-            var p2v1 = {{vs.platform[1]}}_ticker['{{market}}'][0];
-            var p2v2 = {{vs.platform[1]}}_ticker['{{market}}'][1];
-            var pot = 0;
-            var v_str = (p1v1 + "").length <= (p2v1 + "").length ?  (p1v1 + "") : (p2v1 + "");
-            var start = v_str.indexOf(".");
-            if( start != -1){
-              pot = v_str.substring(start+1, v_str.length).length
+          var off1 = {{off_dic}}['{{market}}_off1'];
+          var perc1 = {{off_dic}}['{{market}}_perc1'];
+            $('#{{market}}_off1').text(off1 + ", ("+prec1+"%)")
+            if( off1 > 0 && perc1 > 10 ){
+              $('#{{market}}_off1').attr("class", "text-error")
             }
-
-            var avg =  (parseFloat(v1) + parseFloat(v2))/2;
-            var off = {{vs.platform[0]}}_ticker['{{market}}'] - {{vs.platform[1]}}_ticker['{{market}}'];
-
-            off_str = new Number(off).toFixed(pot) + " ({{market}})   ";
-            if( Math.abs(off) > (avg * 0.03) ){
-              $('#{{market}}_off_{{vs.idx}}').attr("class", "text-error")
+            //zb买bfx卖
+          var off2 = {{off_dic}}['{{market}}_off2'];
+          var perc2 = {{off_dic}}['{{market}}_perc2'];
+            $('#{{market}}_off2').text(off2 + ", ("+perc2+"%)")
+            if( off2 > 0 && perc2 > 0 ){
+              $('#{{market}}_off2').attr("class", "text-success")
             }
-            //百分比
-            var percent = new Number(Math.abs(off) / avg * 100).toFixed(2);
-            if (off < 0){
-              // percent = percent * -1;
-              $('#{{market}}_percent_{{vs.idx}}').attr("class", "muted")
-            }
-            $('#{{market}}_percent_{{vs.idx}}').text("   ="+percent+"%" );
-            
-          }
-          $('#{{market}}_off_{{vs.idx}}').text( off_str );
         {% endfor -%}
-
-      {% endfor -%}
       console.log("---------------done");
     });
 

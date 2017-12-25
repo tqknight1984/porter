@@ -12,6 +12,7 @@ import md5
 import urlparse
 import subprocess
 
+from banDao import banDao
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -33,8 +34,6 @@ html_name = ""
 
 
 
-markers = ['eos', []]
-
 html_txt = {
         'version' : '2.0.0',
         'ver':time.strftime("%Y%m%d%H%M%S", time.localtime()),
@@ -51,29 +50,16 @@ html_txt = {
         'servers' : [],
         'redisInfo' : [],
         'spider' : [],
-        'vs_pairs':[
-            {
-                'idx':1,
-                'name':'ZB vs BFX',
-                'platform': ['zb', 'bfx'],
-                # 
-                'markets': ['btc_usdt','eos_usdt', 'eos_btc', 'eth_usdt', 'eth_btc', 'etc_usdt', 'etc_btc',  'xrp_usdt', 'xrp_btc','qtum_usdt', 'qtum_btc',],
-            },
-            # {   
-            #     'idx':2,
-            #     'name':'ZB vs BA',
-            #     'platform': ['zb', 'ba'],
-            #     # 'qtum_btc',
-            #     'markets': ['btc_usdt','ltc_usdt','ltc_btc', 'eos_btc','eth_usdt', 'eth_btc', 'etc_btc',  'xrp_btc',],
-            # },
-            # {   
-            #     'idx':3,
-            #     'name':'BFX vs BA',
-            #     'platform': ['bfx', 'ba'],
-            #     # 'qtum_btc',
-            #     'markets': ['btc_usdt','ltc_usdt','ltc_btc', 'eos_btc','eth_usdt', 'eth_btc', 'etc_btc',  'xrp_btc',],
-            # },
-        ]
+
+        'vs_name':'ZB vs BFX',
+        'platform': ['zb', 'bfx'],
+        'markets': ['btc_usdt','eos_usdt', 'eos_btc', 'eth_usdt', 'eth_btc', 'etc_usdt', 'etc_btc',  'xrp_usdt', 'xrp_btc','qtum_usdt', 'qtum_btc',],
+        
+        'myorders':[],
+        'ticker_dic':{},
+        'account_dic':{},
+        'off_dic':{},
+        
     }
 
 #
@@ -147,6 +133,81 @@ if __name__ == "__main__":
     
     html_name = http_path + time.strftime("/tianqin_%Y%m%d%H.html", time.localtime())
     print 'html_name------->',html_name
+
+
+    ticker_dic = {}
+    account_dic = {}
+
+    #myOrder
+    myorders = banDao.selectMyOrderByAll()
+
+    for plat in html_txt['platform'] :
+        for mkt in html_txt['markets'] :
+            coin = mkt.split('_')[0]
+            coin = coin.lower()
+            mkt_db = mkt.replace('_','/')
+            #ticker
+            ticker = banDao.selectTicker(plat, mkt_db)
+            ticker_dic[plat+"_"+mkt] = ticker
+            #account
+            account = banDao.selectCount(plat, coin)
+            account_dic[plat+"_"+coin] = account
+    
+    print "myorders-------------->",myorders
+    print "ticker_dic-------------->",ticker_dic
+    print "account_dic-------------->",account_dic
+
+    html_txt['myorders'] = myorders
+    html_txt['ticker_dic'] = ticker_dic
+    html_txt['account_dic'] = account_dic
+
+    #差价 百分比
+    off_dic = {}
+    plat1 = html_txt['platform'][0]
+    plat2 = html_txt['platform'][1]
+    for mkt in html_txt['markets'] :
+        p1v = ticker_dic[plat1+'_'+mkt]
+        p2v = ticker_dic[plat2+'_'+mkt]
+
+        p1v1 = p1v[0]
+        p1v2 = p1v[1]
+        p2v1 = p2v[0]
+        p2v2 = p2v[1]
+
+        pot = 0;
+        v_str = str(p1v1)
+        if len(str(p1v1)) <= len(str(p2v1)) :
+            v_str = str(p1v1)
+        else :
+            v_str = str(p2v1)
+        start = v_str.index(".");
+        if start != -1 :
+            pot = len(v_str[start+1:])
+        # print "p1v1-------------->",p1v1
+        # print "p2v1-------------->",p2v1
+        # print "pot-------------->",pot
+
+        #zb --> bfx      zb卖bfx买
+        off1 = p1v2 - p2v1
+        avg1 = (p1v2 + p2v1)/2
+        perc1 = '%.2f' % ( 100 * off1 / avg1)
+
+        print "off1-------------->",off1
+        print "perc1-------------->",perc1
+        
+        off_dic[mkt+'_off1'] = off1
+        off_dic[mkt+'_perc1'] = perc1
+
+        #bfx --> zb      bfx卖zb买
+        off2 = p2v2 - p1v1
+        avg2 = (p2v2 + p1v1)/2
+        perc2 = '%.2f' % ( 100 * off2 / avg2)
+        
+        off_dic[mkt+'_off2'] = off2
+        off_dic[mkt+'_perc2'] = perc2
+        
+    html_txt['off_dic'] = off_dic
+
 
 
     # if (os.path.exists(html_name)):

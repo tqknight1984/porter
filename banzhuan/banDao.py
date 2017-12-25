@@ -9,10 +9,13 @@ reload(sys)
 sys.setdefaultencoding('utf-8')
 
 
-DB_TICKER = 'ticker.db'
-DB_ACCOUNT = 'account.db'
-DB_MY_ORDER = 'my_order.db'
+DB_TICKER = '/data/app/tq/db/ticker.db'
+DB_ACCOUNT = '/data/app/tq/db/account.db'
+DB_MY_ORDER = '/data/app/tq/db/my_order.db'
 
+# DB_TICKER = 'ticker.db'
+# DB_ACCOUNT = 'account.db'
+# DB_MY_ORDER = 'my_order.db'
 
 class banDao(object):
 
@@ -72,10 +75,10 @@ class banDao(object):
     @staticmethod
     def insertAccount(plat, up_tm, account_ls):
         conn = sqlite3.connect(DB_ACCOUNT)
+        conn.execute("DELETE from tb_account where plat='%s';" % (plat))
         for inf in account_ls :
-            coin = inf['coin']
+            coin = inf['coin'].lower()
             balance = inf['balance']
-            conn.execute("DELETE from tb_account where plat='%s' and coin='%s';" % (plat, coin))
             ist_sql = '''INSERT INTO tb_account (plat, up_tm, coin ,balance) 
                 VALUES ('%s', %s, '%s' ,'%s' );''' % (plat, up_tm, coin, balance)
             print '-ist_sql-------------', ist_sql
@@ -83,10 +86,11 @@ class banDao(object):
         conn.commit()
         conn.close()
 
+
     @staticmethod
     def createMyOrder():
-        if os.path.isfile(DB_MY_ORDER):
-            os.remove(DB_MY_ORDER)
+        # if os.path.isfile(DB_MY_ORDER):
+        #     os.remove(DB_MY_ORDER)
 
         conn = sqlite3.connect(DB_MY_ORDER)
         conn.execute('''CREATE TABLE if not exists tb_my_order
@@ -108,6 +112,13 @@ class banDao(object):
         conn.commit()
         conn.close()
 
+    @staticmethod
+    def deleteMyOrderByMkt(plat, mkt):
+        conn = sqlite3.connect(DB_MY_ORDER)      
+        conn.execute("DELETE from tb_my_order where plat='%s' and market='%s';" % (plat, mkt))
+        conn.commit()
+        conn.close()
+
     #  [{'status': u'ACTIVE', 'price': 9, 'amount': 10, 'coin': u'EOS', 'side': 'buy', 'market': u'tEOSUSD'}]
     @staticmethod
     def insertMyOrder(plat, up_tm, oderLs):
@@ -120,13 +131,13 @@ class banDao(object):
             side = odrDic['side']
             amount = odrDic['amount']
             price = odrDic['price']
-            conn.execute("DELETE from tb_my_order where plat='%s' and coin='%s';" % (plat,coin))
             ist_sql = '''INSERT INTO tb_my_order (plat, up_tm, coin ,market, side, price, amount) 
                 VALUES ('%s', %s, '%s' ,'%s', '%s', '%s' ,'%s' );''' % (plat, up_tm, coin, market, side, price, amount)
             print '-ist_sql-------------', ist_sql
             conn.execute(ist_sql)
         conn.commit()
         conn.close()
+
 
     @staticmethod
     def selectMyOrder(coin):
@@ -150,6 +161,48 @@ class banDao(object):
         conn.close()
         return res
 
+    @staticmethod
+    def selectMyOrderByPlat(plat):
+        conn = sqlite3.connect(DB_MY_ORDER)
+        sel_sql = "SELECT  plat, coin, market, side, price, amount from tb_my_order where plat='%s';" % (
+            plat)
+        # print '-sel_sql-------------', sel_sql
+        cursor = conn.execute(sel_sql)
+        res = []
+        for row in cursor:
+            print 'row ======>', row[0], row[1], row[2], row[3], row[4], row[5]
+            ele = {
+                'plat':row[0],
+                'coin':row[1],
+                'market':row[2],
+                'side':row[3],
+                'price':row[4],
+                'amount':row[5],
+            }
+            res.append(ele)
+        conn.close()
+        return res
+
+    @staticmethod
+    def selectMyOrderByAll():
+        conn = sqlite3.connect(DB_MY_ORDER)
+        sel_sql = "SELECT  plat, coin, market, side, price, amount from tb_my_order ;"
+        # print '-sel_sql-------------', sel_sql
+        cursor = conn.execute(sel_sql)
+        res = []
+        for row in cursor:
+            print 'row ======>', row[0], row[1], row[2], row[3], row[4], row[5]
+            ele = {
+                'plat':row[0],
+                'coin':row[1],
+                'market':row[2],
+                'side':row[3],
+                'price':row[4],
+                'amount':row[5],
+            }
+            res.append(ele)
+        conn.close()
+        return res
 
     @staticmethod
     def selectTicker(plat,  market):
@@ -163,21 +216,22 @@ class banDao(object):
 
         res = None
         now = int(time.time())
-        for row in cursor:
-            up_tm = row[0]
-            bid = row[1]
-            ask = row[2]
-            last = row[3]
+        if cursor :
+            for row in cursor:
+                up_tm = row[0]
+                bid = row[1]
+                ask = row[2]
+                last = row[3]
 
-            # if (now - up_tm) < 0 or (now - up_tm)> 20 :
-            #     print u'市场买卖价格数据未更新。。。'
-            #     break
-            if  bid == None  or ask == None or last == None :
-                print u'市场买卖价格数据有误。。。'
-                break
-            
-            res = (bid, ask, last)
-            break    
+                # if (now - up_tm) < 0 or (now - up_tm)> 20 :
+                #     print u'市场买卖价格数据未更新。。。'
+                #     break
+                if  bid == None  or ask == None or last == None :
+                    print u'市场买卖价格数据有误。。。'
+                    break
+                
+                res = (bid, ask, last)
+                break    
         conn.close()
         return res
 
@@ -196,7 +250,7 @@ class banDao(object):
     @staticmethod
     def selectCount(plat, coin):
         conn = sqlite3.connect(DB_ACCOUNT)
-        sel_sql = "SELECT  up_tm, balance from tb_account where plat = '%s' and coin='%s';" % (
+        sel_sql = "SELECT up_tm, balance from tb_account where plat = '%s' and coin='%s';" % (
             plat, coin)
         # print '-sel_sql-------------', sel_sql
         balance = 0.0

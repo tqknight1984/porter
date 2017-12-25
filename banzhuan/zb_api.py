@@ -254,32 +254,45 @@ if __name__ == "__main__":
             banDao.createAccount()
             account_ls = zb.get_account_info()
             banDao.insertAccount(PLAT, up_tm, account_ls)
+
         elif name in ('-m','--myorder'):
             print '>>> >>> query--ZB------->myorder'
             banDao.createMyOrder()
-            banDao.deleteMyOrder(PLAT)
             for mkt, symb in markets.items():
                 oders = zb.get_oders(symb)
+                banDao.deleteMyOrderByMkt(PLAT, mkt)
                 banDao.insertMyOrder(PLAT, up_tm, oders)
                 time.sleep(1)
                 
         elif name in ('-g','--generator'):
             data={}
+            account={}
             nginx_path = '/data/app/nginx/html/'
             tm_str = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
 
             print 'curtm------->',tm_str
 
+            #买卖信息
             for mkt, symb in markets.items() :
                 # last = bz.getZbTicker(mkt)
                 ticker = banDao.selectTicker(PLAT, mkt)
-                data[mkt.replace("/","_")] = ticker
+                mkt_js = mkt.replace("/","_")
+                data[mkt_js] = ticker
                 print ticker
 
+                coin = mkt.split('/')[0].upper();
+                balance = banDao.selectCount(PLAT,coin)
+                account[coin] = balance
+
+
             data['up_tm'] = tm_str
+            account['up_tm'] = tm_str
 
             temp_file = nginx_path + time.strftime("v2_zb_%Y%m%d%H%M%S.js", time.localtime())
-            outStr = "zb_ticker = %s" % json.dumps(data)
+            outStr = """
+            zb_ticker = %s;
+            zb_account = %s;
+            """ % (json.dumps(data),json.dumps(account) )
             zb.outputJs(temp_file, outStr)
 
             subprocess.call("cp -rf " + temp_file + " " + nginx_path + "/v2_zb.js", shell=True);

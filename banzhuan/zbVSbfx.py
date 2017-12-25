@@ -204,15 +204,15 @@ if __name__ == "__main__":
     zb_plat='zb'
     bfx_plat='bfx'
     ban_ls=[
-        {   
-        'market':'btc/usdt',
-        'zb_symb':'btc_usdt',
-        'bfx_symb':'tBTCUSD',
-        'direction':'zb2bfx',
-        'limit_perc':10,
-        'trade_amount':0.2,
-        'margin_perc':0.05,
-        },
+        # {   
+        # 'market':'btc/usdt',
+        # 'zb_symb':'btc_usdt',
+        # 'bfx_symb':'tBTCUSD',
+        # 'direction':'zb2bfx',
+        # 'limit_perc':10,
+        # 'trade_amount':0.2,
+        # 'margin_perc':0.05,
+        # },
         {   
         'market':'eos/usdt',
         'zb_symb':'eos_usdt',
@@ -252,8 +252,10 @@ if __name__ == "__main__":
                     perc = 100 * off / avg
                     if perc >= limit_perc :
                         ban_flag = 1
+                    else :
+                        print u'%s差价 %s , %s < %s 不通过' % (market, off, prec , limit_prec)
         
-        if ban_flag != 1 or ban_flag != 2 :
+        if ban_flag != 1 and ban_flag != 2 :
             print u'差价条件不通过', market
             continue
 
@@ -261,11 +263,13 @@ if __name__ == "__main__":
         #是否有未完成的挂单
         if ban_flag == 1 :
             myods = banDao.selectMyOrder(coin)
+            print u'myods-------------->%s' % (len(myods))
             if len(myods) == 0 :
                 ban_flag = 3
+                
 
 
-        if ban_flag != 3 or ban_flag != 4 :
+        if ban_flag != 3 and ban_flag != 4 :
             print u'有未完成的挂单', market
             continue
 
@@ -280,7 +284,7 @@ if __name__ == "__main__":
                         ban_flag = 5
 
 
-        if ban_flag != 5 or ban_flag != 6 :
+        if ban_flag != 5 and ban_flag != 6 :
             print u'账户条件不通过', market
             continue
 
@@ -298,7 +302,7 @@ if __name__ == "__main__":
                     if buy_id > 0 :
                         ban_flag =7
 
-        if ban_flag != 7 or ban_flag != 8 :
+        if ban_flag != 7 and ban_flag != 8 :
             print u'挂单失败', market
             continue
 
