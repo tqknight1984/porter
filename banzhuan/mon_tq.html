@@ -84,7 +84,7 @@
           <h4>未完成的挂单</h4>
           <ul class="unstyled" id="{{plat}}_myorder">
           {% for odr in myorders -%}
-          <li >{{odr['side']}}</li>
+          <li >{{odr['plat']}} {{odr['market']}} {{odr['price']}} {{odr['side']}} {{odr['amount']}}</li>
           {% endfor -%}
           </ul>
       </div>
@@ -98,7 +98,9 @@
         {% for plat in platform -%}
           {% for market in markets -%}
           //ticker
-          $('#{{plat}}_{{market}}').text( {{ticker_dic}}['{{plat}}_{{market}}'] );
+          var ticker = {{ticker_dic}};
+
+          $('#{{plat}}_{{market}}').text( ticker['{{plat}}_{{market}}'] );
            // balance
           coin = '{{market}}'.split('_')[0];
           coin = coin.toLowerCase();
@@ -107,10 +109,10 @@
           {% endfor -%}
         {% endfor -%}
 
-        {% for market in vs.markets -%}
+        {% for market in markets -%}
           var off1 = {{off_dic}}['{{market}}_off1'];
           var perc1 = {{off_dic}}['{{market}}_perc1'];
-            $('#{{market}}_off1').text(off1 + ", ("+prec1+"%)")
+            $('#{{market}}_off1').text(off1 + ", ("+perc1+"%)")
             if( off1 > 0 && perc1 > 10 ){
               $('#{{market}}_off1').attr("class", "text-error")
             }
