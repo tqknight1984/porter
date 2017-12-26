@@ -125,7 +125,7 @@ class bfx_api(object):
         # print 'BFX ticker------------->', res
         if res :
             # 买 卖  最新
-            return (float(res['bid']), float(res['ask']), float(res['last_price']) )
+            return [ float(res['bid']), float(res['ask']), float(res['last_price']) ]
         else :
             return None
         
@@ -349,8 +349,8 @@ if __name__ == "__main__":
         'xrp/btc':'tXRPBTC',
         }
     bfx = bfx_api()
-    balance = bfx.get_balance()
-    print "--------",balance
+    # balance = bfx.get_balance()
+    # print "--------",balance
 
     up_tm = int(time.time())
     
@@ -377,8 +377,15 @@ if __name__ == "__main__":
         elif name in ('-a','--account'):
             print '>>> >>> query--BFX------->account'
             banDao.createAccount()
-            account_ls = bfx.get_account_wallet()
-            banDao.insertAccount(PLAT, up_tm, account_ls)
+            balance_ls = bfx.get_balance()
+            insert_ls = []
+            for balance in balance_ls :
+                ele ={
+                    'coin':balance['currency'],
+                    'balance':balance['available']
+                }
+                insert_ls.append(ele)
+            banDao.insertAccount(PLAT, up_tm, insert_ls)
         elif name in ('-m','--myorder'):
             print '>>> >>> query--BFX------->myorder'
             banDao.createMyOrder()

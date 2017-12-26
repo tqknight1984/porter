@@ -9,13 +9,13 @@ reload(sys)
 sys.setdefaultencoding('utf-8')
 
 
-DB_TICKER = '/data/app/tq/db/ticker.db'
-DB_ACCOUNT = '/data/app/tq/db/account.db'
-DB_MY_ORDER = '/data/app/tq/db/my_order.db'
+# DB_TICKER = '/data/app/tq/db/ticker.db'
+# DB_ACCOUNT = '/data/app/tq/db/account.db'
+# DB_MY_ORDER = '/data/app/tq/db/my_order.db'
 
-# DB_TICKER = 'ticker.db'
-# DB_ACCOUNT = 'account.db'
-# DB_MY_ORDER = 'my_order.db'
+DB_TICKER = 'ticker.db'
+DB_ACCOUNT = 'account.db'
+DB_MY_ORDER = 'my_order.db'
 
 class banDao(object):
 
@@ -230,7 +230,7 @@ class banDao(object):
                     print u'市场买卖价格数据有误。。。'
                     break
                 
-                res = (bid, ask, last)
+                res = [bid, ask, last]
                 break    
         conn.close()
         return res

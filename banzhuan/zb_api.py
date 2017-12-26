@@ -41,7 +41,7 @@ class zb_api:
         ticker = jo.get("ticker", None)
         # print 'ZB ticker------------->', ticker
         if ticker:
-            return ( float(ticker['buy']), float(ticker['sell']), float(ticker['last']) )
+            return [ float(ticker['buy']), float(ticker['sell']), float(ticker['last']) ]
         else:
             return None
 
@@ -113,6 +113,7 @@ class zb_api:
 
         except ValueError as e:
             print(e)
+            
     #获取用户信息
     def get_account_info(self):
         dict={"method":"getAccountInfo","accesskey":str(self.access_key)}
@@ -256,9 +257,9 @@ if __name__ == "__main__":
             banDao.insertAccount(PLAT, up_tm, account_ls)
 
         elif name in ('-m','--myorder'):
-            print '>>> >>> query--ZB------->myorder'
             banDao.createMyOrder()
             for mkt, symb in markets.items():
+                print '>>> >>> query--ZB------->myorder----', symb
                 oders = zb.get_oders(symb)
                 banDao.deleteMyOrderByMkt(PLAT, mkt)
                 banDao.insertMyOrder(PLAT, up_tm, oders)

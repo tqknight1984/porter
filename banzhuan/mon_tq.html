@@ -20,7 +20,7 @@
 
     <script src="./static/bootstrap.min.js"></script>
 
-    <meta http-equiv="Refresh" content="30" >
+    <meta http-equiv="Refresh" content="60" >
     <title>一个亿</title>
   </head>
   <body>
@@ -50,11 +50,11 @@
             <th width="" class="">交易对</th>
             {% for plat in platform -%}
             <th width="" class="">{{plat}}: (买价, 卖价) <br>
-              <span class="muted" >持有</span>
+              <span class="muted" >持有</span><span class="muted" id = "{{plat}}_usd" ></span>
             </th>
             {% endfor -%}
             <th width="" class=""> bfx买zb卖<span class="text-error">?大于10%</span><br>
-              zb买bfx卖<span class="text-success">?大于0%</span></th>
+              zb买bfx卖<span class="text-success">?小于0%</span></th>
           </thead>
           <tbody>
             {% for market in markets -%}
@@ -94,33 +94,42 @@
 
   <script>
     $(function(){
+      //ticker
+      var ticker = {{ticker_dic}};
+
+      //account
+      var account = {{account_dic}};
+      $('#{{plat}}_usd').text(account['{{plat}}_'+coin] );
+      $('#{{plat}}_usd').text(account['{{plat}}_'+coin] );
+
+      //off_dic
+      var off_dic = {{off_dic}};
+
+
 
         {% for plat in platform -%}
           {% for market in markets -%}
-          //ticker
-          var ticker = {{ticker_dic}};
-
-          $('#{{plat}}_{{market}}').text( ticker['{{plat}}_{{market}}'] );
+          $('#{{plat}}_{{market}}').text( '('+ticker['{{plat}}_{{market}}'][0] + ',   ' + ticker['{{plat}}_{{market}}'][1]+')' );
            // balance
           coin = '{{market}}'.split('_')[0];
           coin = coin.toLowerCase();
-          $('#{{plat}}_balance_{{market}}').text( {{account_dic}}['{{plat}}_'+coin] );
+          $('#{{plat}}_balance_{{market}}').text(account['{{plat}}_'+coin] );
 
           {% endfor -%}
         {% endfor -%}
 
         {% for market in markets -%}
-          var off1 = {{off_dic}}['{{market}}_off1'];
-          var perc1 = {{off_dic}}['{{market}}_perc1'];
+          var off1 = off_dic['{{market}}_off1'];
+          var perc1 = off_dic['{{market}}_perc1'];
             $('#{{market}}_off1').text(off1 + ", ("+perc1+"%)")
             if( off1 > 0 && perc1 > 10 ){
               $('#{{market}}_off1').attr("class", "text-error")
             }
             //zb买bfx卖
-          var off2 = {{off_dic}}['{{market}}_off2'];
-          var perc2 = {{off_dic}}['{{market}}_perc2'];
+          var off2 = off_dic['{{market}}_off2'];
+          var perc2 = off_dic['{{market}}_perc2'];
             $('#{{market}}_off2').text(off2 + ", ("+perc2+"%)")
-            if( off2 > 0 && perc2 > 0 ){
+            if( off2 < 0 && perc2 < 0 ){
               $('#{{market}}_off2').attr("class", "text-success")
             }
         {% endfor -%}
