@@ -5,7 +5,7 @@ reload(sys)
 sys.setdefaultencoding('utf-8')
 
 proxies = {"https": "https://127.0.0.1:1080"}  #这里是你代理科学上网的端口
-timeout=30
+timeout=5
 class request_call(object):
 
     @staticmethod

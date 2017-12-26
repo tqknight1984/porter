@@ -50,7 +50,7 @@
             <th width="" class="">交易对</th>
             {% for plat in platform -%}
             <th width="" class="">{{plat}}: (买价, 卖价) <br>
-              <span class="muted" >持有</span><span class="muted" id = "{{plat}}_usd" ></span>
+              <span class="muted" >持有usdt:</span><span class="muted" id = "{{plat}}_usdt" >{{plat}}_usdt</span>
             </th>
             {% endfor -%}
             <th width="" class=""> bfx买zb卖<span class="text-error">?大于10%</span><br>
@@ -99,19 +99,17 @@
 
       //account
       var account = {{account_dic}};
-      $('#{{plat}}_usd').text(account['{{plat}}_'+coin] );
-      $('#{{plat}}_usd').text(account['{{plat}}_'+coin] );
+      $('#zb_usdt').text(account['zb_usdt'].toFixed(2) );
+      $('#bfx_usdt').text(account['bfx_usd'].toFixed(2) );
 
       //off_dic
       var off_dic = {{off_dic}};
-
-
 
         {% for plat in platform -%}
           {% for market in markets -%}
           $('#{{plat}}_{{market}}').text( '('+ticker['{{plat}}_{{market}}'][0] + ',   ' + ticker['{{plat}}_{{market}}'][1]+')' );
            // balance
-          coin = '{{market}}'.split('_')[0];
+          var coin = '{{market}}'.split('_')[0];
           coin = coin.toLowerCase();
           $('#{{plat}}_balance_{{market}}').text(account['{{plat}}_'+coin] );
 

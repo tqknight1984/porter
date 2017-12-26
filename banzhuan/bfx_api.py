@@ -122,13 +122,14 @@ class bfx_api(object):
         symb = symb[1:]
         path = 'v1/pubticker/%s' % symb
         res =  self.api_get(path)
-        # print 'BFX ticker------------->', res
+        print 'BFX ticker------------->', symb,  res
         if res :
             # 买 卖  最新
             return [ float(res['bid']), float(res['ask']), float(res['last_price']) ]
         else :
             return None
         
+         
         
 
      #取当前行情订单
@@ -143,12 +144,7 @@ class bfx_api(object):
         else :
             return None
 
-    #取当前行情
-    def get_tick(self, symb):
-        path = 'v2/tickers'
-        res =  self.api_get(path)
-        return res.json
-        
+
     #分别获取买单和卖单的平均价格
     def get_avg_prices(self, symbols):
         body ={
@@ -279,7 +275,7 @@ class bfx_api(object):
 
         try:
             if type(json_resp) is type([]):
-                print "nice"
+                print "bfx get_balance----------success"
         except:
             return json_resp['message']
 
@@ -349,8 +345,8 @@ if __name__ == "__main__":
         'xrp/btc':'tXRPBTC',
         }
     bfx = bfx_api()
-    # balance = bfx.get_balance()
-    # print "--------",balance
+    balance = bfx.get_symb_tick('tBTCUSD')
+    print "--------",balance
 
     up_tm = int(time.time())
     

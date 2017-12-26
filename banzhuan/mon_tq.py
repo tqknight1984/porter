@@ -55,8 +55,8 @@ html_txt = {
 
         'vs_name':'ZB vs BFX',
         'platform': ['zb', 'bfx'],
-        'markets': ['btc/usdt','eos/usdt', 'eos/btc', 'eth/usdt', 'eth/btc', 'etc/usdt', 'etc/btc',  'xrp/usdt', 'xrp/btc','qtum/usdt', 'qtum/btc',],
-        
+        'markets': ['btc_usdt','eos_usdt', 'eos_btc', 'eth_usdt', 'eth_btc', 'etc_usdt', 'etc_btc',  'xrp_usdt', 'xrp_btc','qtum_usdt', 'qtum_btc',],
+        # 
         'myorders':[],
         'ticker_dic':{},
         'account_dic':{},
@@ -145,53 +145,64 @@ if __name__ == "__main__":
     # myorders = banDao.selectMyOrderByAll()
     #bfx未完成的挂单
     myorders = bfx.get_act_orders()
+    zb_odr_ls = zb.getOrdersNew()
+    for odr in zb_odr_ls :
+        myorders.append(odr)
+    print u'bfx未完成的挂单------->',myorders
 
-    #zb账户信息
+    #账户信息
     account_dic = {}
-    zb_acc_ls = zb.get_account_info()
-    for zb_acc in zb_acc_ls :
-        # print 'coin---zb---->', zb_acc['coin'] ,zb_acc['balance'] 
-        account_dic['zb_'+zb_acc['coin']] = zb_acc['balance'] 
-
-    #bfx账户信息
+     #bfx
     bfx_balance_ls = bfx.get_balance()
     for bfx_balance in bfx_balance_ls :
         # print 'coin---bfx---->', bfx_balance['type'] ,bfx_balance['currency'] ,bfx_balance['available'] 
         account_dic['bfx_'+bfx_balance['currency']] = bfx_balance['available'] 
+    #zb    
+    zb_acc_ls = zb.get_account_info()
+    for zb_acc in zb_acc_ls :
+        # print 'coin---zb---->', zb_acc['coin'] ,zb_acc['balance'] 
+        coin = zb_acc['coin'].lower()
+        account_dic['zb_'+coin] = zb_acc['balance'] 
 
+    print '---->', account_dic
 
 
     for plat in html_txt['platform'] :
         for market in html_txt['markets'] :
-            coin = market.split('/')[0].upper()
-            money = market.split('/')[1]
-            zb_money = money.upper()
-            bfx_money = money.replace('usdt','usd')
-            zb_symb = market.replace('/','_')
-            # print 'zb_symb------->', zb_symb
-            bfx_symb = market.replace('/','')
+            db_market = market.replace('_', '/')
+            
+            zb_symb = market
+            bfx_symb = market.replace('_','')
             bfx_symb = 't'+ (bfx_symb.replace('usdt','usd').upper())
-            # print 'bfx_symb------->', bfx_symb
+            bfx_symb = bfx_symb.replace('QTUM','QTM')
+            print 'zb_symb------->', zb_symb
+            print 'bfx_symb------->', bfx_symb
+            
 
-            #ticker
-            zb_trick = zb.getZbTicker(zb_symb)
-            bfx_trick = bfx.get_symb_tick(bfx_symb)
+            # #ticker
+            # zb_trick = zb.getZbTicker(zb_symb)
+            # bfx_trick = bfx.get_symb_tick(bfx_symb)
+            # time.sleep(1)
+
+            # #ticker from DB
+            zb_trick = banDao.selectTicker('zb', db_market)
+            bfx_trick = banDao.selectTicker('bfx', db_market)
 
             ticker_dic['zb_'+market] = zb_trick
             ticker_dic['bfx_'+market] = bfx_trick
 
             #未完成的挂单
-            zb_odr = zb.get_oders(zb_symb)
-            for odr in zb_odr :
-                myorders.append(odr)
+            # zb_odr = zb.get_oders(zb_symb)
+            # for odr in zb_odr :
+            #     myorders.append(odr)
                 
     print "myorders-------------->",myorders
     print "ticker_dic-------------->",ticker_dic
-    print "account_dic-------------->",account_dic
+    print "account_dic-------------->",json.dumps(account_dic)
 
     html_txt['myorders'] = myorders
     html_txt['ticker_dic'] = ticker_dic
-    html_txt['account_dic'] = account_dic
+    html_txt['account_dic'] = json.dumps(account_dic)
 
     #差价 百分比
     off_dic = {}

@@ -160,8 +160,47 @@ class zb_api:
         url=self.host+'/cancelOrder'
         signature=self.zb_signature(dict)
         payload=self.add_sign_retime(dict,signature,self.milliseconds())
-        return  request_call.zb_proxy_call(url,payload)
+        return  request_call.zb_call(url,payload)
+        # return  request_call.zb_proxy_call(url,payload)
 
+
+    #获取多个委托买单或卖单，每次请求返回10条记录
+    def getOrdersNew(self,pageIndex=1,tradeType=1):
+        dict={"accesskey":str(self.access_key),'pageIndex':pageIndex,'tradeType':tradeType,'method':'getOrdersNew'}
+        url=self.host+'/getOrdersNew'
+        signature=self.zb_signature(dict)
+        payload=self.add_sign_retime(dict,signature,self.milliseconds())
+        orders = request_call.zb_call(url,payload)
+        #zb_proxy_call
+        # print currency,'------orders-----',orders
+
+        res = []
+        if orders :
+            if type(orders) is type([]) :
+                for odr in orders :
+                    #status : 挂单状态(0：待成交,1：取消,2：交易完成,3：待成交未交易部份)
+                    if odr['status'] == '2' or odr['status'] == '1' :
+                        continue                
+                    currency = odr['currency']
+                    coin = currency[0: currency.index('_')]
+                    # print 'coin-----------',coin
+                    market = currency.replace('_','/')
+                    # print 'market-----------',market
+                    side = 'zzz'
+                    if odr['type'] == 0:
+                        side = 'sell'
+                    if odr['type'] == 1:
+                        side = 'buy'
+
+                    ele = {
+                        'coin':coin,
+                        'market':market,
+                        'side':side,
+                        'amount':odr['total_amount'],
+                        'price':odr['price'],
+                    }
+                    res.append(ele)
+        return res
 
     #获取多个委托买单或卖单，每次请求返回10条记录
     def get_oders(self,currency,pageIndex=1,tradeType=1):
@@ -170,6 +209,7 @@ class zb_api:
         signature=self.zb_signature(dict)
         payload=self.add_sign_retime(dict,signature,self.milliseconds())
         orders = request_call.zb_call(url,payload)
+        #zb_proxy_call
         # print currency,'------orders-----',orders
 
         res = []
@@ -226,6 +266,8 @@ if __name__ == "__main__":
     }
 
     zb = zb_api()
+    print 'odr--1-->',zb.getOrdersNew()
+    print 'odr--2-->',zb.get_oders('eth_usdt')
 
     up_tm = int(time.time())
     print 'curtm------->', up_tm
