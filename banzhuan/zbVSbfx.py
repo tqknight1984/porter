@@ -205,13 +205,13 @@ if __name__ == "__main__":
     zb_plat='zb'
     bfx_plat='bfx'
     ban_ls=[
-        {   
-        'market':'btc/usdt',
-        'direction':'zb2bfx',
-        'limit_perc':10,
-        'trade_amount':0.2,
-        'margin_perc':0.05,
-        },
+        # {   
+        # 'market':'btc/usdt',
+        # 'direction':'zb2bfx',
+        # 'limit_perc':10,
+        # 'trade_amount':0.2,
+        # 'margin_perc':0.05,
+        # },
         {   
         'market':'eos/usdt',
         'direction':'zb2bfx',
@@ -219,13 +219,13 @@ if __name__ == "__main__":
         'trade_amount':10.0,
         'margin_perc':0.05,
         },
-        {   
-        'market':'eos/btc',
-        'direction':'zb2bfx',
-        'limit_perc':10,
-        'trade_amount':10.0,
-        'margin_perc':0.05,
-        },
+        # {   
+        # 'market':'eos/btc',
+        # 'direction':'zb2bfx',
+        # 'limit_perc':10,
+        # 'trade_amount':10.0,
+        # 'margin_perc':0.05,
+        # },
         {   
         'market':'eth/usdt',
         'direction':'zb2bfx',
@@ -280,16 +280,22 @@ if __name__ == "__main__":
     #bfx未完成的挂单
     bfx_odrs = []
     bfx_odr_ls = bfx.get_act_orders()
+    print 'bfx_odr_ls------->', bfx_odr_ls
     for bfx_odr in bfx_odr_ls :
         # print 'market------->', bfx_odr['market'] 
         bfx_odrs.append(bfx_odr['market'])
+    
+    zb_odr_ls = zb.getOrdersNew()
+    print 'zb_odr_ls------->', zb_odr_ls
+    for zb_odr in zb_odr_ls :
+        bfx_odrs.append(zb_odr['market'])
 
 
     #zb账户信息
     zb_acc_dic = {}
     zb_acc_ls = zb.get_account_info()
+    print 'zb_acc_ls------->', zb_acc_ls 
     for zb_acc in zb_acc_ls :
-        # print 'coin---zb---->', zb_acc['coin'] ,zb_acc['balance'] 
         zb_acc_dic[zb_acc['coin']] = zb_acc['balance'] 
 
     #bfx账户信息
@@ -363,7 +369,7 @@ if __name__ == "__main__":
                         print u'%s差价%s <= %s 不满足' % (market, perc, limit_perc)
 
         if buy_price == 0.0 and sell_price == 0.0 :
-            print u'coin的挂单买卖价格异常'
+            print u'%s的挂单买卖价格异常' % coin
             ban_flag = -1
         
         #是否有未完成的挂单
@@ -378,8 +384,8 @@ if __name__ == "__main__":
 
         #账户条件
         if ban_flag == 3 :
-            print u'zb, %s 数量: %s >= %s' % (coin, zb_acc_dic[coin], trade_amount)
-            print u'bfx, %s 数量: %s >= %s' % (bfx_money, bfx_acc_dic[bfx_money],  (trade_amount * buy_price))
+            print u'zb %s 数量 %s >= %s' % (coin, zb_acc_dic[coin], trade_amount)
+            print u'bfx %s 数量 %s >= %s' % (bfx_money, bfx_acc_dic[bfx_money],  (trade_amount * buy_price))
             #卖coin
             if zb_acc_dic[coin] < trade_amount :
                 print u'zb: %s %s >= %s，不满足' %  (coin, zb_acc_dic[coin], trade_amount)

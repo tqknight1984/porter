@@ -31,7 +31,7 @@ email_flag = False
 daily_flag = False
 
 monpath = ""
-http_path = '/data/app/nginx/html/'
+http_path = '/data/app/nginx/html'
 html_name = ""
 
 
@@ -132,7 +132,7 @@ if __name__ == "__main__":
         else:
             assert False, "unhandled option"
 
-    
+    print 'check_tm------->',html_txt['check_tm']
     html_name = http_path + time.strftime("/tianqin_%Y%m%d%H.html", time.localtime())
     print 'html_name------->',html_name
 

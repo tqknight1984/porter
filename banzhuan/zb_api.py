@@ -267,7 +267,9 @@ if __name__ == "__main__":
 
     zb = zb_api()
     print 'odr--1-->',zb.getOrdersNew()
-    print 'odr--2-->',zb.get_oders('eth_usdt')
+    # print 'odr--2-->',zb.get_oders('eth_usdt')
+
+    # print 'account--3-->', zb.get_account_info()
 
     up_tm = int(time.time())
     print 'curtm------->', up_tm
