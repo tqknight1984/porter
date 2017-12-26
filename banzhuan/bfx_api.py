@@ -266,6 +266,25 @@ class bfx_api(object):
         print 'symbol----------',symbol
         return symbol
 
+    
+    def get_balance(self):
+        payload = {
+            "request": "/v1/balances",
+            "nonce": str(time.time()),
+        }
+
+        signed_payload = self._sign_payload(payload)
+        r = requests.post(self.BASE_URL + "v1/balances", headers=signed_payload, verify=True)
+        json_resp = r.json()
+
+        try:
+            if type(json_resp) is type([]):
+                print "nice"
+        except:
+            return json_resp['message']
+
+        return json_resp
+
     def new_order(self, amount, price, side,  symbol):
         symbol = self.getV1Symbol(symbol)
 
@@ -330,6 +349,8 @@ if __name__ == "__main__":
         'xrp/btc':'tXRPBTC',
         }
     bfx = bfx_api()
+    balance = bfx.get_balance()
+    print "--------",balance
 
     up_tm = int(time.time())
     

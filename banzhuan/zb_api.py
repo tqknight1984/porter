@@ -41,7 +41,7 @@ class zb_api:
         ticker = jo.get("ticker", None)
         # print 'ZB ticker------------->', ticker
         if ticker:
-            return (ticker['buy'], ticker['sell'], ticker['last'])
+            return ( float(ticker['buy']), float(ticker['sell']), float(ticker['last']) )
         else:
             return None
 
@@ -169,7 +169,7 @@ class zb_api:
         signature=self.zb_signature(dict)
         payload=self.add_sign_retime(dict,signature,self.milliseconds())
         orders = request_call.zb_call(url,payload)
-        print currency,'------orders-----',orders
+        # print currency,'------orders-----',orders
 
         res = []
         if orders :
