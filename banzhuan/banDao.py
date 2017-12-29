@@ -9,13 +9,13 @@ reload(sys)
 sys.setdefaultencoding('utf-8')
 
 
-# DB_TICKER = '/data/app/tq/db/ticker.db'
-# DB_ACCOUNT = '/data/app/tq/db/account.db'
-# DB_MY_ORDER = '/data/app/tq/db/my_order.db'
+DB_TICKER = '/data/app/tq/db/ticker.db'
+DB_ACCOUNT = '/data/app/tq/db/account.db'
+DB_MY_ORDER = '/data/app/tq/db/my_order.db'
 
-DB_TICKER = 'ticker.db'
-DB_ACCOUNT = 'account.db'
-DB_MY_ORDER = 'my_order.db'
+# DB_TICKER = 'ticker.db'
+# DB_ACCOUNT = 'account.db'
+# DB_MY_ORDER = 'my_order.db'
 
 class banDao(object):
 
@@ -231,7 +231,8 @@ class banDao(object):
                     break
                 
                 res = [bid, ask, last]
-                break    
+                break  
+            cursor.close()  
         conn.close()
         return res
 

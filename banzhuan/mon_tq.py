@@ -140,31 +140,34 @@ if __name__ == "__main__":
     bfx = bfx_api()
 
     ticker_dic = {}
+    myorders = []
+    account_dic={}
 
-    #myOrder
-    # myorders = banDao.selectMyOrderByAll()
     #bfx未完成的挂单
-    myorders = bfx.get_act_orders()
+    bfx_odr_ls = bfx.get_act_orders()
+    print u'bfx未完成的挂单------->',myorders
+    for odr in bfx_odr_ls :
+        myorders.append(odr)
     zb_odr_ls = zb.getOrdersNew()
+    print u'zb未完成的挂单------->',myorders
     for odr in zb_odr_ls :
         myorders.append(odr)
-    print u'bfx未完成的挂单------->',myorders
 
     #账户信息
     account_dic = {}
      #bfx
     bfx_balance_ls = bfx.get_balance()
+    print u'bfx 账户信息------->',bfx_balance_ls
     for bfx_balance in bfx_balance_ls :
         # print 'coin---bfx---->', bfx_balance['type'] ,bfx_balance['currency'] ,bfx_balance['available'] 
         account_dic['bfx_'+bfx_balance['currency']] = bfx_balance['available'] 
     #zb    
     zb_acc_ls = zb.get_account_info()
+    print u'zb 账户信息------->',zb_acc_ls
     for zb_acc in zb_acc_ls :
         # print 'coin---zb---->', zb_acc['coin'] ,zb_acc['balance'] 
         coin = zb_acc['coin'].lower()
         account_dic['zb_'+coin] = zb_acc['balance'] 
-
-    print '---->', account_dic
 
 
     for plat in html_txt['platform'] :
@@ -187,6 +190,8 @@ if __name__ == "__main__":
             # #ticker from DB
             zb_trick = banDao.selectTicker('zb', db_market)
             bfx_trick = banDao.selectTicker('bfx', db_market)
+            print "zb_trick-------------->",db_market, zb_trick
+            print "bfx_trick-------------->",db_market, bfx_trick
 
             ticker_dic['zb_'+market] = zb_trick
             ticker_dic['bfx_'+market] = bfx_trick
@@ -196,9 +201,6 @@ if __name__ == "__main__":
             # for odr in zb_odr :
             #     myorders.append(odr)
                 
-    print "myorders-------------->",myorders
-    print "ticker_dic-------------->",ticker_dic
-    print "account_dic-------------->",json.dumps(account_dic)
 
     html_txt['myorders'] = myorders
     html_txt['ticker_dic'] = ticker_dic
@@ -237,7 +239,7 @@ if __name__ == "__main__":
 
         # print "off1-------------->",off1
         # print "perc1-------------->",perc1
-        
+        off_dic[mkt+'_off1_step'] = '%f - %f = %s' % (round(p1v2, pot), round(p2v1, pot), round(off1, pot))
         off_dic[mkt+'_off1'] = round(off1, pot)
         off_dic[mkt+'_perc1'] = perc1
 
@@ -249,6 +251,7 @@ if __name__ == "__main__":
         # print "off2-------------->",off2
         # print "perc2-------------->",perc2
         
+        off_dic[mkt+'_off2_step'] = '%f - %f = %s' % (round(p1v1, pot), round(p2v2, pot), round(off2, pot))
         off_dic[mkt+'_off2'] = round(off2, pot)
         off_dic[mkt+'_perc2'] = perc2
         
