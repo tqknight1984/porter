@@ -1,12 +1,13 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-import urllib2
+# import urllib2
+from urllib import request, parse
 import json
 import time
 import os
 
-from sosobtcUtil import SosobtcUtil
-from confUtil import ConfUtil
+# from sosobtcUtil import SosobtcUtil
+# from confUtil import ConfUtil
 from fileReadUtil import FileReadUtil
 
 appid = 'wx5d2607e7bf434326'
@@ -22,15 +23,15 @@ class WxStart():
     def getToken(self):
         # 判断缓存
         url = 'https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=' + self.appid + "&secret=" + self.secrect
-        # print "getToken：url----->%s" % url
-        f = urllib2.urlopen(url)
+        # #print "getToken：url----->%s" % url
+        f = request.urlopen(url)
         s = f.read()
         # 读取json数据
         j = json.loads(s)
         j.keys()
 
         if j.get("errcode", None):
-            print (u"错误信息 >>> >>> %s" % j['errmsg']).encode('utf-8')
+            #print (u"错误信息 >>> >>> %s" % j['errmsg']).encode('utf-8')
             return
         token = j['access_token']
         return token
@@ -57,10 +58,18 @@ class WxStart():
 
 # 模拟post请求
     def post_data(self, url, para_dct):
-        para_data = para_dct
-        f = urllib2.urlopen(url, para_data)
-        content = f.read()
-        return content
+        # para_data = para_dct
+        # f = urllib2.urlopen(url, para_data)
+        # content = f.read()
+        # return content
+
+        data = parse.urlencode(para_dct)
+        req = request.urlopen(url,  data=data)  # POST方法
+        # req = request.Request(url+params)  # GET方法
+        page = req.read()
+        page = page.decode('utf-8')
+        print(page)
+
 
     def sendSms(self, uname, send_str, color='#173177'):
         #
@@ -100,95 +109,96 @@ users = ("tq","zj","tt",)
 if __name__ == '__main__':
     
     thi = WxStart()
-    coins_info = SosobtcUtil(0.05, 0.05).getCoinInfo(coins)
-    print "\nzec----->%.2f---->%s" % (coins_info['zec']['soso_offv'], coins_info['zec']['notify_str'])
-    print "eth----->%.2f---->%s" % (coins_info['eth']['soso_offv'], coins_info['eth']['notify_str'])
-    print "etc----->%.2f---->%s" % (coins_info['etc']['soso_offv'], coins_info['etc']['notify_str'])
-
-
-    conf_path = os.path.split(os.path.realpath(__file__))[0] + "/conf/"
-    coufUtil = ConfUtil(conf_path)
-    users_info = coufUtil.getUserConf(users, coins)
-    # print "---->%s" % (users_info['tq']['zec']['logic'])
-
-#差价预警
-    for user in users:
-        # 是否发送通知
-        send_flag = 0
-        # 发送通知内容
-        send_str = u""
-        for coin in coins:
-            # print "%s-------------->%s" % (coin, coins_info[coin]['notify_str'])
-            #差价
-            if users_info.has_key(user) and users_info[user].has_key(coin):
-                # print u"%s----%s---->%s %s " % (user, coin, users_info[user][coin]['max_off'], users_info[user][coin]['min_off'])
-                if users_info[user][coin]['notify'] == '1':
-                    yunbi = float(coins_info[coin]['yunbi'])
-                    szzc = float(coins_info[coin]['szzc'])
-                    soso_offv = float(coins_info[coin]['soso_offv'])
-                    notify_str = coins_info[coin]['notify_str']
-                    # 差价
-                    max_off_str = users_info[user][coin]['max_off']
-                    min_off_str = users_info[user][coin]['min_off']
-                    max_off = 0.0
-                    min_off = 0.0
-                    if max_off_str != 'None' :
-                        max_off = float(max_off_str)
-                    if min_off_str != 'None' :
-                        min_off = float(min_off_str)
-                    # 市价
-                    max_val_str = users_info[user][coin]['max_val']
-                    min_val_str = users_info[user][coin]['min_val']
-                    max_val = 0.0
-                    min_val = 0.0
-                    if max_val_str != 'None' :
-                        max_val = float(max_val_str)
-                    if min_val_str != 'None' :
-                        min_val = float(min_val_str)
-
-                    # print (u"%s差价:%s(soso_offv) | %s(notify_str) | %s(max_off) | %s(min_off)" % (coin, soso_offv, notify_str, max_off_str, min_off_str)).encode('utf-8')
-                    # print (u"%s市价:%s(yunbi) | %s(szzc) | %s(max_val) | %s(min_val)" % (coin, yunbi, szzc, max_val_str, min_val_str)).encode('utf-8')
-                    # 差价
-                    if min_off_str != 'None' and soso_offv > min_off:
-                        send_flag = 1
-                        send_str = u"%s差价:%s > %s\r\n" % (send_str, notify_str, min_off_str)
-                    if max_off_str != 'None' and soso_offv < max_off:
-                        send_flag = 1
-                        send_str = u"%s差价:%s < %s\r\n" % (send_str, notify_str, max_off_str)
-                    #市价
-                    if min_val > 0 :
-                        if  yunbi > min_val :
-                            send_flag = 1
-                            send_str =  u"%s%s市价:yunbi:%s > %s\r\n" % (send_str, coin, str(yunbi), min_val_str)
-                        if  szzc > min_val :
-                            send_flag = 1
-                            send_str = u"%s%s市价:szzc:%s > %s\r\n" % (send_str, coin, str(szzc), min_val_str)
-
-                    if max_val > 0 :
-                        if yunbi > 0 and yunbi < max_val :
-                            send_flag = 1
-                            send_str = u"%s%s市价:yunbi:%s < %s\r\n" % (send_str, coin, str(yunbi), max_val_str)
-                        if szzc > 0 and szzc < max_val :
-                            send_flag = 1
-                            send_str = u"%s%s市价:szzc:%s < %s\r\n" % (send_str, coin, str(szzc), max_val_str)
-
-#频率限制
-        if send_flag == 1:
-            if user != 'tq' :
-                sms_count = coufUtil.getNotifyCount(user)
-                if sms_count >= 2 :
-                    send_flag = 0
-                    print (u"%s 频率限制----> %d 次/小时" % (user, sms_count)).encode('utf-8')
-
-        # 微信通知
-        # print u"000---->%s " % send_flag
-        if send_flag == 1:
-            print (u"满足价格要求,通知%s---->%s" % (user, send_str)).encode('utf-8')
-            thi.sendSms(user, send_str)
+    thi.sendSms("tq", "123456")
+#     coins_info = SosobtcUtil(0.05, 0.05).getCoinInfo(coins)
+#     #print "\nzec----->%.2f---->%s" % (coins_info['zec']['soso_offv'], coins_info['zec']['notify_str'])
+#     #print "eth----->%.2f---->%s" % (coins_info['eth']['soso_offv'], coins_info['eth']['notify_str'])
+#     #print "etc----->%.2f---->%s" % (coins_info['etc']['soso_offv'], coins_info['etc']['notify_str'])
+#
+#
+#     conf_path = os.path.split(os.path.realpath(__file__))[0] + "/conf/"
+#     coufUtil = ConfUtil(conf_path)
+#     users_info = coufUtil.getUserConf(users, coins)
+#     # #print "---->%s" % (users_info['tq']['zec']['logic'])
+#
+# #差价预警
+#     for user in users:
+#         # 是否发送通知
+#         send_flag = 0
+#         # 发送通知内容
+#         send_str = u""
+#         for coin in coins:
+#             # #print "%s-------------->%s" % (coin, coins_info[coin]['notify_str'])
+#             #差价
+#             if users_info.has_key(user) and users_info[user].has_key(coin):
+#                 # #print u"%s----%s---->%s %s " % (user, coin, users_info[user][coin]['max_off'], users_info[user][coin]['min_off'])
+#                 if users_info[user][coin]['notify'] == '1':
+#                     yunbi = float(coins_info[coin]['yunbi'])
+#                     szzc = float(coins_info[coin]['szzc'])
+#                     soso_offv = float(coins_info[coin]['soso_offv'])
+#                     notify_str = coins_info[coin]['notify_str']
+#                     # 差价
+#                     max_off_str = users_info[user][coin]['max_off']
+#                     min_off_str = users_info[user][coin]['min_off']
+#                     max_off = 0.0
+#                     min_off = 0.0
+#                     if max_off_str != 'None' :
+#                         max_off = float(max_off_str)
+#                     if min_off_str != 'None' :
+#                         min_off = float(min_off_str)
+#                     # 市价
+#                     max_val_str = users_info[user][coin]['max_val']
+#                     min_val_str = users_info[user][coin]['min_val']
+#                     max_val = 0.0
+#                     min_val = 0.0
+#                     if max_val_str != 'None' :
+#                         max_val = float(max_val_str)
+#                     if min_val_str != 'None' :
+#                         min_val = float(min_val_str)
+#
+#                     # #print (u"%s差价:%s(soso_offv) | %s(notify_str) | %s(max_off) | %s(min_off)" % (coin, soso_offv, notify_str, max_off_str, min_off_str)).encode('utf-8')
+#                     # #print (u"%s市价:%s(yunbi) | %s(szzc) | %s(max_val) | %s(min_val)" % (coin, yunbi, szzc, max_val_str, min_val_str)).encode('utf-8')
+#                     # 差价
+#                     if min_off_str != 'None' and soso_offv > min_off:
+#                         send_flag = 1
+#                         send_str = u"%s差价:%s > %s\r\n" % (send_str, notify_str, min_off_str)
+#                     if max_off_str != 'None' and soso_offv < max_off:
+#                         send_flag = 1
+#                         send_str = u"%s差价:%s < %s\r\n" % (send_str, notify_str, max_off_str)
+#                     #市价
+#                     if min_val > 0 :
+#                         if  yunbi > min_val :
+#                             send_flag = 1
+#                             send_str =  u"%s%s市价:yunbi:%s > %s\r\n" % (send_str, coin, str(yunbi), min_val_str)
+#                         if  szzc > min_val :
+#                             send_flag = 1
+#                             send_str = u"%s%s市价:szzc:%s > %s\r\n" % (send_str, coin, str(szzc), min_val_str)
+#
+#                     if max_val > 0 :
+#                         if yunbi > 0 and yunbi < max_val :
+#                             send_flag = 1
+#                             send_str = u"%s%s市价:yunbi:%s < %s\r\n" % (send_str, coin, str(yunbi), max_val_str)
+#                         if szzc > 0 and szzc < max_val :
+#                             send_flag = 1
+#                             send_str = u"%s%s市价:szzc:%s < %s\r\n" % (send_str, coin, str(szzc), max_val_str)
+#
+# #频率限制
+#         if send_flag == 1:
+#             if user != 'tq' :
+#                 sms_count = coufUtil.getNotifyCount(user)
+#                 if sms_count >= 2 :
+#                     send_flag = 0
+#                     #print (u"%s 频率限制----> %d 次/小时" % (user, sms_count)).encode('utf-8')
+#
+#         # 微信通知
+#         # #print u"000---->%s " % send_flag
+#         if send_flag == 1:
+#             #print (u"满足价格要求,通知%s---->%s" % (user, send_str)).encode('utf-8')
+#             thi.sendSms(user, send_str)
 
 
     # if not off :
-    #     print u"价格不符合要求，退出！"
+    #     #print u"价格不符合要求，退出！"
     # else :
     #     #价格符合通知要求，进一步判断是否要微信通知
     #     f = FileReadUtil("/Users/app/Documents/zcash/porter/last_wx_send_record.txt", 1000, 0.5*60*60)

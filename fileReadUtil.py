@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-import urllib2
+# import urllib2
 import json
 import time
 
@@ -17,14 +17,14 @@ class FileReadUtil(object):
         return
 
     def fileTest(self):
-        print "------>", self._file.tell()
+        #print("------>", self._file.tell())
 
         return
 
     def hasLine(self, num):
         for index in range(num):
             line = self._file.next()
-            print "line---%d--->%s --> %d" % (index, line, len(line))
+            #print("line---%d--->%s --> %d" % (index, line, len(line)))
 
         return False
 
@@ -44,7 +44,7 @@ class FileReadUtil(object):
             return 1
         else:
             off_tm = int(time.time()) - int(self.firstLine()[0:10])
-            print "off_tm = ", off_tm
+            # print "off_tm = ", off_tm
             if off_tm < self._offTm:
                 return 2
         return 3
@@ -68,18 +68,18 @@ class FileReadUtil(object):
         # print "flag------->", flag
         # 追加并发消息
         if flag == 1:
-            print ">>> >>> 通知限制以内，追加并发消息"
+            #print ">>> >>> 通知限制以内，追加并发消息"
             self.writeAdd()
             return True
 
         # 不发消息，不操作文件
         if flag == 2:
-            print ">>> >>> 达到通知上限，不发消息，不操作文件"
+            # print ">>> >>> 达到通知上限，不发消息，不操作文件"
             return False
 
         # 重写并发消息
         if flag == 3:
-            print ">>> >>> 重置通知标识，重写并发消息"
+            #print ">>> >>> 重置通知标识，重写并发消息"
             self.writeOver()
             return True
 
